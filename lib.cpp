@@ -18,7 +18,7 @@ void automata_variable()
     
 }
 void automata_float(){
-    system("cls");cout<<"escribe un numero\n\tEjemplo:3.2 3\n\n\t>>";
+    system("cls");cout<<"escribe un numero\n\tEjemplo:3.2, 3\n\n\t>>";
     string  _s = "";getline(cin, _s);salida(_s, is_float(_s));
 }
 void automata_keyword(){
