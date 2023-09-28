@@ -198,7 +198,7 @@ void automata_numero()
 }
 void automata_variable()
 {
-    system("cls");cout<<"escribe una variable\n\tEjemplo: _chiludo, HolaMundo, evieChiluda43\n\n\t>>";
+    system("cls");cout<<"escribe una variable\n\tEjemplo: _evie, HolaMundo, ramires_533\n\n\t>>";
     string  _s = "";getline(cin, _s);salida(_s, is_valid_ID(_s));
     
 }
@@ -211,7 +211,7 @@ void automata_keyword(){
     string  _s = "";getline(cin, _s);salida(_s, is_keyword(_s));
 }
 void automata_string(){
-    system("cls");cout<<"escribe una cadena\n\tEjemplo: if, else, with\n\n\t>>";
+    system("cls");cout<<"escribe una cadena\n\tEjemplo: \"es cine pa\"\n\n\t>>";
     string  _s = "";getline(cin, _s);salida(_s, is_string(_s));
 }
 
