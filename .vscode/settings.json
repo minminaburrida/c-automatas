@@ -1,9 +1,9 @@
 {
     "files.associations": {
+        "*.embeddedhtml": "html",
         "*.html": "html",
         "*.css": "css",
         "*.ts": "typescript",
-        "*.embeddedhtml": "html",
         "iostream": "cpp",
         "cstring": "cpp",
         "ostream": "cpp",
@@ -46,6 +46,7 @@
         "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "ctime": "cpp"
     }
 }
