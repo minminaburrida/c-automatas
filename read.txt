@@ -1,7 +1,20 @@
-#Aqui ignora comentarios
-"""
-Aqui tambien
-"""
+#Aqui ignora comentarios  Comentario de mishji
+/*
+
+
+erestonta????
+*/
+entero tonto
+ a:entero = 32 /* si */
+ retornar a /* va a 
+retornar a w*/
+fin tonto
+/*
+y deberia ignorar este comentario*/
+#but no hay pedo porque te ignora
+
+/*y esto  Comentario 2
+"""y esto  Comentario 3"""*/
 #Programa de un lenguaje falso, en efecto, esto es un comment
 programa pilin
  vacio inicio

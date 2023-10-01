@@ -1,6 +1,4 @@
-#include "keywords.hpp"
-#include "numbers.hpp"
-#include "chars.hpp"
+#include "cosos rancios.hpp"
 #include "str.hpp"
 
 bool is_int(string _s){

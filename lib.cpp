@@ -3,6 +3,7 @@
 #include<string>
 #include"lib/automatas.hpp"
 #include"lib/input_file.hpp"
+#include"lib/lexemas.hpp"
 // #include"./lib/analizador/analizar.h"
 void salida(string _, bool condicion){cout<<_<<" es ";if (!condicion) cout<<"in";cout<<"valido\n";}
 
@@ -30,8 +31,16 @@ void automata_string(){
     system("cls");cout<<"escribe una cadena\n\tEjemplo: \"es cine pa\"\n\n\t>>";
     string  _s = "";getline(cin, _s);salida(_s, is_string(_s));
 }
+
+
+void analisis(){read_file();}
 void leer_archivo(){
     analisis();
+}
+void lester(){lenxeria();}
+
+    // Probably deprecated LOL
+    
     // // string _file = read();
     // // cout<<_file<<endl;
     // vector<Token> tokens = analizar(read());
@@ -43,9 +52,6 @@ void leer_archivo(){
     //     std::cout << "Tipo: " << token.tipo << std::endl;
     //     std::cout << std::endl; // Dos saltos de línea entre tokens
     // }
-}
-
-void analisis(){read_file();}
 // const char* t[5] = {"00", "_32", "My var", "MyVar", "myVar"};
 // const char* t[5] = {"0x32", "32", "0b0100010", "0basd", "0x32AB"};
 
