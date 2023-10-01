@@ -1,12 +1,17 @@
+#Aqui ignora comentarios
+"""
+Aqui tambien
+"""
+#Programa de un lenguaje falso, en efecto, esto es un comment
 programa pilin
  vacio inicio
   escribe("pene")
   _myfunc("XD")
-  si 1==1
-   escribe("cola")
+  si 1==1 #da la condicional de que si 1 es igual a 1
+   escribe("cola") #esto imprimira en pantalla "cola"
   fin si
  fin inicio
  vacio _myfunc(cadena _)
   escribe(_)
  fin _myfunc
-finprograma
+fin programa

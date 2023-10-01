@@ -21,6 +21,7 @@ int main(){
             case '4': automata_keyword();break;
             case '5': automata_string();break;
             case '6': leer_archivo();break;
+            default: analisis();break;
         }
     }
     return 0;
