@@ -27,16 +27,23 @@ int next_is_EOL()
         return 0;
     }
 }
-int next_is_EOF() {
-    if (inStream.eof()) {
+int next_is_EOF()
+{
+    if (inStream.eof())
+    {
         // Ya no hay más líneas, pero aún hay que asegurarse de que estamos al
         // final de la línea anterior.
-        if (next_is_EOL() == 1) {
+        if (next_is_EOL() == 1)
+        {
             return 1;
-        } else {
+        }
+        else
+        {
             return 0;
         }
-    } else {
+    }
+    else
+    {
         return 0;
     }
 }
@@ -402,27 +409,145 @@ string read_file()
     {
         programText += programLine + '\n';
     }
-    cout<< programText << '\n';
+// Imprime el src sin comentarios
+    // cout << programText << '\n';
     return programText;
 }
 
 bool is_comment = false;
 bool in_comment = false;
-void lenxeria()
+// Tipos de datos:
+/*
+keyword: palabra reservada
+variable: una variable de cualquier tipo
+int: numero sin punto decimal
+float: numero con punto decimal
+':': tipo de variable
+'(': abrir grupo
+')': cerrar grupo
+'[': abrir array
+']': cerrar array
+*/
+string leer() {}
+
+bool isOperator(char c)
 {
-    string programText = read_file();
+    return (c == ':' || c == '*' || c == '(' || c == ')' || c == '[' || c == ']');
+}
 
-    istringstream programStream(programText);
+bool isUnderscore(char c)
+{
+    return (c == '_');
+}
 
-    NextLine(); // Para hacer la primera lectura.
+bool isLetter(char c)
+{
+    return std::isalpha(static_cast<unsigned char>(c)) || isUnderscore(static_cast<unsigned char>(c));
+}
 
-    while (next_is_EOF() != 1)
+bool isDigit(char c)
+{
+    return std::isdigit(static_cast<unsigned char>(c)) || c == '.';
+}
+
+void lexu()
+{
+
+    /*
+    TODO:
+        quiero que diga por cada token:
+    tipo de token: <toktype> // meter una condicional si entra en palabras reservadas (las que vienen ahi + algunas que se puedan meter) 
+    valor: <valor> // valor absoluto del token (escribir, 3, "soy vegetta")
+    ubicacion: <linea>:<numero de caracter> // Ubicacion exacta del token (23:33)
+    \n\n (2 saltos de linea)
+
+    */
+    std::string programText = read_file();
+    bool inIdentifier = false;
+    bool inStringLiteral = false;
+    bool inNumber = false;
+    bool escapeNextChar = false;
+    std::string currentString;
+
+    for (char c : programText)
     {
-        // Aquí puedes llamar a tus funciones para procesar el código fuente.
-        // Por ejemplo, NextToken() debería ser llamada aquí.
-        NextToken();
-        std::cout << srcToken << std::endl;
-
-        // Asegúrate de llamar a NextLine() cuando sea necesario para avanzar a la siguiente línea.
+        if (c == '\n')
+        {
+            // Detectar salto de línea
+            std::cout << "\nSalto de linea";
+            inIdentifier = false;
+            inStringLiteral = false;
+            inNumber = false;
+        }
+        else if (c == '"' && !inStringLiteral && !inNumber)
+        {
+            // Inicio de cadena
+            inStringLiteral = true;
+            currentString.clear();
+            std::cout << "\nCadena: \"";
+        }
+        else if (c == '"' && inStringLiteral && !escapeNextChar)
+        {
+            // Fin de cadena
+            inStringLiteral = false;
+            std::cout << currentString << "\"";
+            currentString.clear();
+        }
+        else if (inStringLiteral)
+        {
+            // Construir cadena
+            if (c == '\\' && !escapeNextChar)
+            {
+                escapeNextChar = true;
+            }
+            else
+            {
+                currentString += c;
+                escapeNextChar = false;
+            }
+        }
+        else if (isOperator(c))
+        {
+            // Detectar operadores
+            if (inIdentifier)
+            {
+                inIdentifier = false;
+            }
+            std::cout << "\nOperador: " << c;
+        }
+        else if (isLetter(c) || (inIdentifier && isUnderscore(c)))
+        {
+            // Detectar identificadores
+            if (!inIdentifier)
+            {
+                std::cout << "\nIdentificador: ";
+                std::cout << c;
+                inIdentifier = true;
+            }
+            else
+            {
+                std::cout << c;
+            }
+        }
+        else if (isDigit(c) && !inStringLiteral)
+        {
+            // Detectar números enteros y decimales
+            if (!inNumber)
+            {
+                std::cout << "\nNumero: ";
+                std::cout << c;
+                inNumber = true;
+            }
+            else
+            {
+                std::cout << c;
+            }
+        }
+        else
+        {
+            inIdentifier = false;
+            inStringLiteral = false;
+            inNumber = false;
+        }
     }
 }

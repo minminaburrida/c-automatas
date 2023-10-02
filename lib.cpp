@@ -37,7 +37,7 @@ void analisis(){read_file();}
 void leer_archivo(){
     analisis();
 }
-void lester(){lenxeria();}
+void lester(){lexu();}
 
     // Probably deprecated LOL
     

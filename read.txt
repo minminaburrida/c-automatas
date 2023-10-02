@@ -22,6 +22,7 @@ programa pilin
   _myfunc("XD")
   si 1==1 #da la condicional de que si 1 es igual a 1
    escribe("cola") #esto imprimira en pantalla "cola"
+   32.32
   fin si
  fin inicio
  vacio _myfunc(cadena _)
