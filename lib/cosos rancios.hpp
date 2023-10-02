@@ -29,8 +29,8 @@ set<char> types= {'n','t',92, '"', 'b', 'r'};
 set<string> keywords= {
     "if", "switch",
     "else", "si",
-    "while",
-    "for",
+    "while", "cadena", "vacio",
+    "for", "entero",
     "with",
     "seleccionar",
     "caso",
@@ -39,5 +39,8 @@ set<string> keywords= {
     // TODO: Agreguen las keywords en español
 
 };
-bool is_keyword(string s){return keywords.find(s) != keywords.end();}
+bool is_keyword(string s){
+    //si
+    // cout<<"\n\n"<<s<<"\n\n";
+    return keywords.find(s) != keywords.end();}
 bool is_bs(char s){return types.find(s) != types.end();}

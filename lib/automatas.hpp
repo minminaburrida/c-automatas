@@ -1,6 +1,5 @@
 #include "cosos rancios.hpp"
 #include "str.hpp"
-
 bool is_int(string _s){
     str item = init(_s);
     int s = 0;
