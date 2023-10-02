@@ -449,11 +449,9 @@ bool isDigit(char c)
 {
     return std::isdigit(static_cast<unsigned char>(c)) || c == '.';
 }
-string tipo_id(string s)
-{
-    if (is_keyword(s))
-        return "Palabra Reservada";
-    return "Identificador";
+string tipo_id(string s){
+      if (is_keyword(s)) return "Palabra Reservada";
+      return "Identificador";
 }
 void lexu()
 {
@@ -461,7 +459,7 @@ void lexu()
     /*
     TODO:
         quiero que diga por cada token:
-    tipo de token: <toktype> // meter una condicional si entra en palabras reservadas (las que vienen ahi + algunas que se puedan meter)
+    tipo de token: <toktype> // meter una condicional si entra en palabras reservadas (las que vienen ahi + algunas que se puedan meter) 
     valor: <valor> // valor absoluto del token (escribir, 3, "soy vegetta")
     ubicacion: <linea>:<numero de caracter> // Ubicacion exacta del token (23:33)
     \n\n (2 saltos de linea)
@@ -473,7 +471,7 @@ void lexu()
     bool inNumber = false;
     bool escapeNextChar = false;
     // Linea y caracter
-    int line = 1, _char = 1, token = 1;
+    int line=1, _char=1,token=1;
     std::string currentString;
 
     for (char c : programText)
@@ -485,15 +483,15 @@ void lexu()
             inIdentifier = false;
             inStringLiteral = false;
             inNumber = false;
-            _char = 1;
-            line++;
+            _char=1;line++;
+
         }
         else if (c == '"' && !inStringLiteral && !inNumber)
         {
             // Inicio de cadena
             inStringLiteral = true;
             currentString.clear();
-            std::cout << "\n\nToken #" << token << "\nTipo: Cadena\nUbicacion: Linea " << line << ", Caracter " << _char << "\nValor: \"";
+            std::cout << "\n\nToken #"<<token<<"\nTipo: Cadena\nUbicacion: Linea"<<line<<", Caracter"<<_char<<"\nValor: \"";
             token++;
         }
         else if (c == '"' && inStringLiteral && !escapeNextChar)
@@ -523,7 +521,7 @@ void lexu()
             {
                 inIdentifier = false;
             }
-            std::cout << "\n\nToken #" << token << "\nTipo: Operador\nUbicacion: Linea " << line << ", Caracter " << _char << "\nValor: " << c;
+            std::cout << "\n\nToken #"<<token<<"\nTipo: Operador\nUbicacion: Linea"<<line<<", Caracter"<<_char<<"\nValor: " << c;
             token++;
         }
         else if (isLetter(c) || (inIdentifier && isUnderscore(c)))
@@ -531,8 +529,7 @@ void lexu()
             // Detectar identificadores
             if (!inIdentifier)
             {
-
-                std::cout << "\n\nToken #" << token << "\nTipo: " << (is_keyword(currentString) ? "Palabra Reservada" : "Identificador") << "\nUbicacion: Linea " << line << ", Caracter " << _char << "\nValor: ";
+                std::cout << "\n\nToken #"<<token<<"\nTipo: " << tipo_id(currentString) << "\nUbicacion: Linea "<<line<<", Caracter "<<_char<<"\nValor: ";
                 token++;
                 std::cout << c;
                 inIdentifier = true;
@@ -547,7 +544,7 @@ void lexu()
             // Detectar números enteros y decimales
             if (!inNumber)
             {
-                std::cout << "\n\nToken #" << token << "\nTipo: Numero\nUbicacion: Linea " << line << ", Caracter " << _char << "\nValor: ";
+                std::cout << "\n\nToken #"<<token<<"\nTipo: Numero\nUbicacion: Linea"<<line<<", Caracter"<<_char<<"\nValor: ";
                 token++;
                 std::cout << c;
                 inNumber = true;
@@ -562,13 +559,6 @@ void lexu()
             inIdentifier = false;
             inStringLiteral = false;
             inNumber = false;
-
-            // Verificar si el token actual es una palabra reservada
-            if (is_keyword(currentString))
-            {
-                std::cout << "\nTipo: Palabra Reservada";
-            }
-            std::cout << "\nUbicacion: Linea " << line << ", Caracter " << _char << "\nValor: " << currentString;
         }
         _char++;
     }
