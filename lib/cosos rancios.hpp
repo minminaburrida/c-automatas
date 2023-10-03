@@ -26,19 +26,14 @@ bool is_dot(char _){return _=='.';}
 // Para ver si es valido \n \t \\ \" \'
 set<char> types= {'n','t',92, '"', 'b', 'r'};
 // Palabras reservadas
-set<string> keywords= {
-    "if", "switch",
-    "else", "si",
-    "while", "cadena", "vacio",
-    "for", "entero",
-    "with",
-    "seleccionar",
-    "caso",
-    "verdadero",
-    "falso"
-    // TODO: Agreguen las keywords en español
-
+const std::set<std::string> keywords = {
+    "si", "sino", "mientras", "para", "hacer",
+    "entero", "decimal", "caracter", "cadena",
+    "retorna", "clase", "publico", "privado", "estructura",
+    "entero", "rompe", "continuar", "funcion",
+    "nuevo", "finsi", "finmientras", "finpara", "final",
 };
+
 bool is_keyword(string s){
     //si
     // cout<<"\n\n"<<s<<"\n\n";
