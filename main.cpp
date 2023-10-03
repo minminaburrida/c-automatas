@@ -20,7 +20,7 @@ int main(){
             case '3': automata_float();break;
             case '4': automata_keyword();break;
             case '5': automata_string();break;
-            case '6': leer_archivo();break;
+            case '6': lester();break;
             default: lester();break;
         }
     }

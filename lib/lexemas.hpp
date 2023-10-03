@@ -432,7 +432,7 @@ string leer() {}
 
 bool isOperator(char c)
 {
-    return (c == ':' || c == '*' || c == '(' || c == ')' || c == '[' || c == ']');
+    return (c == ':' || c == '*' || c == '(' || c == ')' || c == '[' || c == ']' || c == '=' || c == '!');
 }
 
 bool isUnderscore(char c)
@@ -450,8 +450,8 @@ bool isDigit(char c)
     return std::isdigit(static_cast<unsigned char>(c)) || c == '.';
 }
 string tipo_id(string s){
-      if (is_keyword(s)) return "Palabra Reservada";
-      return "Identificador";
+    if (is_keyword(s)) return "Palabra Reservada";
+    return "Identificador";
 }
 void lexu()
 {
@@ -562,4 +562,5 @@ void lexu()
         }
         _char++;
     }
+    cout<<"\n\n";
 }
