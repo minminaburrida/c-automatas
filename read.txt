@@ -1,31 +1,4 @@
-#Aqui ignora comentarios  Comentario de mishji
-/*
-
-
-erestonta????
-*/
-entero tonto
- a:entero = 32 /* si */
- retornar a /* va a 
-retornar a w*/
-fin tonto
-/*
-y deberia ignorar este comentario*/
-#but no hay pedo porque te ignora
-
-/*y esto  Comentario 2
-"""y esto  Comentario 3"""*/
-#Programa de un lenguaje falso, en efecto, esto es un comment
-programa pilin
- vacio inicio
-  escribe("pene")
-  _myfunc("XD")
-  si 1==1 #da la condicional de que si 1 es igual a 1
-   escribe("cola") #esto imprimira en pantalla "cola"
-   32.32
-  fin si
- fin inicio
- vacio _myfunc(cadena _)
-  escribe(_)
- fin _myfunc
-fin programa
+escribe("tonto")
++=
++
+++

@@ -12,8 +12,6 @@ struct Token{
     string tipo;
 };
 
-Token tokens[] = {};
-
 class str{
     public:
         const char* cadena;
