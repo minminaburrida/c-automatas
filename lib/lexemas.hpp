@@ -338,7 +338,6 @@ void NextToken()
         }
     }
 }
-
 string read_file()
 {
     string filename = "read.txt"; // Cambia esto al nombre de tu archivo
@@ -449,118 +448,260 @@ bool isDigit(char c)
 {
     return std::isdigit(static_cast<unsigned char>(c)) || c == '.';
 }
-string tipo_id(string s){
-    if (is_keyword(s)) return "Palabra Reservada";
+
+struct token
+{
+    int linea;
+    int caracter;
+    std::string tipo;
+    std::string valor;
+};
+std::vector<token> tokens;
+void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::string &tipo, const std::string &valor)
+{
+    token nuevoToken;
+    nuevoToken.linea = line;
+    nuevoToken.caracter = _char - valor.length();
+    nuevoToken.tipo = tipo;
+    nuevoToken.valor = valor;
+    tokens.push_back(nuevoToken);
+}
+std::vector<std::string> palabrasReservadas = {
+    "Si", "Sino", "Mientras", "Para", "Hacer", "Entero", "Decimal", "Entonces"
+    "Caracter", "Cadena", "Retornar", "Romper", "Repetir", "Nuevo",
+    "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
+string id_or_keyword(string _)
+{
+    for (const std::string &palabra : palabrasReservadas)
+    {if (_ == palabra)return "Palabra Reservada";}
     return "Identificador";
 }
 void lexu()
 {
-
-    /*
-    TODO:
-        quiero que diga por cada token:
-    tipo de token: <toktype> // meter una condicional si entra en palabras reservadas (las que vienen ahi + algunas que se puedan meter) 
-    valor: <valor> // valor absoluto del token (escribir, 3, "soy vegetta")
-    ubicacion: <linea>:<numero de caracter> // Ubicacion exacta del token (23:33)
-    \n\n (2 saltos de linea)
-
-    */
     std::string programText = read_file();
-    bool inIdentifier = false;
-    bool inStringLiteral = false;
-    bool inNumber = false;
-    bool escapeNextChar = false;
+    bool enCadena = false;
+    bool enID = false;
+    bool enNum = false;
+    bool opLogico = false;
+    std::string cadena;
     // Linea y caracter
-    int line=1, _char=1,token=1;
-    std::string currentString;
+    int line = 1, _char = 1;
+    std::vector<token> tokens;
 
-    for (char c : programText)
+    for (int i = 0; i < programText.length(); ++i)
     {
-        if (c == '\n' && !inStringLiteral)
-        {
-            // Detectar salto de línea
-            std::cout << "\nSalto de linea";
-            inIdentifier = false;
-            inStringLiteral = false;
-            inNumber = false;
-            _char=1;line++;
+        char c = programText[i];
 
-        }
-        else if (c == '"' && !inStringLiteral && !inNumber)
+        if (enCadena)
         {
-            // Inicio de cadena
-            inStringLiteral = true;
-            currentString.clear();
-            std::cout << "\n\nToken #"<<token<<"\nTipo: Cadena\nUbicacion: Linea"<<line<<", Caracter"<<_char<<"\nValor: \"";
-            token++;
-        }
-        else if (c == '"' && inStringLiteral && !escapeNextChar)
-        {
-            // Fin de cadena
-            inStringLiteral = false;
-            std::cout << currentString << "\"";
-            currentString.clear();
-        }
-        else if (inStringLiteral)
-        {
-            // Construir cadena
-            if (c == '\\' && !escapeNextChar)
+            // Detectar fin de cadena
+            if (c == '"')
             {
-                escapeNextChar = true;
+                if (programText[i - 1] == '\\')
+                {
+                    cadena += c;
+                }
+                else
+                {
+                    enCadena = false;
+                    // Crear un token de cadena
+                    crearToken(tokens, line, _char, "Cadena", cadena);
+                    cadena.clear();
+                }
             }
             else
             {
-                currentString += c;
-                escapeNextChar = false;
-            }
-        }
-        else if (isOperator(c))
-        {
-            // Detectar operadores
-            if (inIdentifier)
-            {
-                inIdentifier = false;
-            }
-            std::cout << "\n\nToken #"<<token<<"\nTipo: Operador\nUbicacion: Linea"<<line<<", Caracter"<<_char<<"\nValor: " << c;
-            token++;
-        }
-        else if (isLetter(c) || (inIdentifier && isUnderscore(c)))
-        {
-            // Detectar identificadores
-            if (!inIdentifier)
-            {
-                std::cout << "\n\nToken #"<<token<<"\nTipo: " << tipo_id(currentString) << "\nUbicacion: Linea "<<line<<", Caracter "<<_char<<"\nValor: ";
-                token++;
-                std::cout << c;
-                inIdentifier = true;
-            }
-            else
-            {
-                std::cout << c;
-            }
-        }
-        else if (isDigit(c) && !inStringLiteral)
-        {
-            // Detectar números enteros y decimales
-            if (!inNumber)
-            {
-                std::cout << "\n\nToken #"<<token<<"\nTipo: Numero\nUbicacion: Linea"<<line<<", Caracter"<<_char<<"\nValor: ";
-                token++;
-                std::cout << c;
-                inNumber = true;
-            }
-            else
-            {
-                std::cout << c;
+                cadena += c; // Continuar acumulando caracteres dentro de la cadena
             }
         }
         else
         {
-            inIdentifier = false;
-            inStringLiteral = false;
-            inNumber = false;
+            switch (c)
+            {
+            case ' ':
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                break;
+            case '\n':
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Salto de Linea", "\n");
+                cadena.clear();
+                line++;
+                _char = 1;
+                break;
+            case '(':
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Inicio de grupo", "(");
+                break;
+            case ')':
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Fin de grupo", ")");
+                break;
+            case '"':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                enCadena = true;
+                break;
+            case '=':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Asignacion", "=");
+                break;
+            case '*':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Multiplicacion", "*");
+                break;
+            case '/':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Division", "/");
+                break;
+            case '+':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Suma", "+");
+                break;
+            case '-':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Resta", "-");
+                break;
+            case '%':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Residuo", "%");
+                break;
+            case '!':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Op. Logico NOT", "!");
+                break;
+            case '&':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Op. Logico AND", "&");
+                break;
+            case '|':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo Op. Logico OR", "|");
+                break;
+            case ':':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolo para Tipado", ":");
+                break;
+            case '>':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolor Mayor Que", ">");
+                break;
+            case '<':
+                // Stream de cadena
+                if (enID)
+                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                if (enNum)
+                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                crearToken(tokens, line, _char, "Simbolor Menor Que", "<");
+                break;
+            default:
+                if (enCadena)
+                {
+                    cadena += c; // Continuar acumulando caracteres dentro de la cadena
+                }
+                // Si es una letra:
+                if (isLetter(c) || isUnderscore(c))
+                {
+                    // Stream de identificador/keyword
+                    if (!enID)
+                    {
+                        enID = true;
+                        cadena.clear();
+                    }
+                    cadena += c;
+                }
+                else if (is_number(c))
+                {
+                    // Stream de un número
+                    if (!enNum)
+                    {
+                        if (c == '0')
+                        {
+                            // puede ser un numero hex/bin con x, o b mayus/minus
+                        }
+                        enNum = true;
+                        cadena.clear();
+                    }
+                    cadena += c;
+                }
+            }
         }
         _char++;
     }
-    cout<<"\n\n";
+
+    // Imprimir los tokens encontrados
+    for (token &t : tokens)
+    {
+
+        if (t.tipo == "Cadena"){t.valor = '"' + t.valor + '"';}
+        else
+        {
+        }
+        std::cout << "Tipo de token: " << t.tipo << '\n';
+        std::cout << "Valor: ";
+        if (t.valor == "\n")
+            std::cout << "\\n"
+                      << '\n';
+        else
+            std::cout << t.valor << "\n";
+        std::cout << "Ubicacion: Linea " << t.linea << ":" << t.caracter << "\n\n";
+    }
 }
