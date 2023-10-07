@@ -1,3 +1,2 @@
-Si a >= b
-    retornar a == b
-Fin Si
+#Utilizame como playground
+hi im daisy

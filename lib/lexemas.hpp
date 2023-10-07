@@ -468,12 +468,16 @@ void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::st
 }
 std::vector<std::string> palabrasReservadas = {
     "Si", "Sino", "Mientras", "Para", "Hacer", "Entero", "Decimal", "Entonces"
-    "Caracter", "Cadena", "Retornar", "Romper", "Repetir", "Nuevo",
+                                                                    "Caracter",
+    "Cadena", "Retornar", "Romper", "Repetir", "Nuevo",
     "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
 string id_or_keyword(string _)
 {
     for (const std::string &palabra : palabrasReservadas)
-    {if (_ == palabra)return "Palabra Reservada";}
+    {
+        if (_ == palabra)
+            return "Palabra Reservada";
+    }
     return "Identificador";
 }
 void lexu()
@@ -516,199 +520,427 @@ void lexu()
         }
         else
         {
+            // Pilinsote
             switch (c)
             {
             case ' ':
+                // Manejo de espacios
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
                 if (opLogico)
-                {}
+                {
+                    if (cadena == "&&")
+                    {
+                        crearToken(tokens, line, line, "Operador logico AND", "&&");
+                    }
+                    if (cadena == "||")
+                    {
+                        crearToken(tokens, line, line, "Operador logico OR", "||");
+                    }
+                    cadena.clear();
+                    opLogico = false;
+                }
                 break;
+
             case '\n':
+                // Manejo de saltos de línea
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
                 crearToken(tokens, line, _char, "Salto de Linea", "\n");
                 cadena.clear();
+                opLogico = false; // Reiniciar la bandera de operador lógico
                 line++;
                 _char = 1;
                 break;
+
             case '(':
+                // Manejo de paréntesis izquierdos
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
                 crearToken(tokens, line, _char, "Inicio de grupo", "(");
                 break;
+
             case ')':
+                // Manejo de paréntesis derechos
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
                 crearToken(tokens, line, _char, "Simbolo Fin de grupo", ")");
                 break;
+
             case '"':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
                 enCadena = true;
                 break;
-            case '=':
-                // Stream de cadena
-                if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
-                if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                if (opLogico){
-                    cadena+=c;
-                    switch(cadena[0]){
-                        case '!':
-                        {crearToken(tokens, line, _char, "Operador de comparacion Distinto", cadena);opLogico = false;cadena.clear();}
-                        break;
-                        case '=':
-                        {crearToken(tokens, line, _char, "Operador de comparacion Igual", cadena);opLogico = false;cadena.clear();}
-                        break;
-                        case '>':
-                        {crearToken(tokens, line, _char, "Operador de comparacion Mayor Que", cadena);opLogico = false;cadena.clear();}
-                        break;
-                        case '<':
-                        {crearToken(tokens, line, _char, "Operador de comparacion Menor Que", cadena);opLogico = false;cadena.clear();}
-                        break;
-                        case '+':
-                        {crearToken(tokens, line, _char, "Operador de Suma directa", cadena);opLogico = false;cadena.clear();}
-                        break;
-                        case '-':
-                        {crearToken(tokens, line, _char, "Operador de Resta directa", cadena);opLogico = false;cadena.clear();}
-                        break;
-                        case '*':
-                        {crearToken(tokens, line, _char, "Operador de Multiplicacion directa", cadena);opLogico = false;cadena.clear();}
-                        break;
-                        case '/':
-                        {crearToken(tokens, line, _char, "Operador de Division directa", cadena);opLogico = false;cadena.clear();}
-                        break;
-                    }
-                    cadena+=c;
-                    
-                    
-                }
-                else{if (programText[i+1] != '=')crearToken(tokens, line, _char, "Simbolo Asignacion", "=");cadena+=c;opLogico=true;}
-                break;
+
             case '*':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                if (programText[i+1] != '=')crearToken(tokens, line, _char, "Simbolo Multiplicacion", "*");
-                else {cadena+=c;opLogico=true;}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador Multiplicacion directa", "*=");
+                    opLogico = false;i++;
+                }
+                else if (programText[i + 1] == '*'){
+                    crearToken(tokens, line, _char, "Operador Multiplicar al Cuadrado", "**");i++;
+                }
+                else
+                    crearToken(tokens, line, _char, "Simbolo Multiplicacion", "*");
                 break;
             case '/':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                if (programText[i+1] != '=')crearToken(tokens, line, _char, "Simbolo Division", "/");
-                else {opLogico = true; cadena+=c;}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador Division directa", "/=");
+                    opLogico = false;i++;
+                }
+                else
+                    crearToken(tokens, line, _char, "Simbolo Division", "/");
                 break;
             case '+':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                if (programText[i+1] != '=')crearToken(tokens, line, _char, "Simbolo Suma", "+");
-                else {cadena.clear();opLogico = true; cadena+=c;}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador Suma directa", "+=");
+                    opLogico = false;i++;
+                }
+                else if (programText[i + 1] == '+'){
+                    crearToken(tokens, line, _char, "Operador Sumar 1", "++");i++;
+                }
+                else
+                    crearToken(tokens, line, _char, "Simbolo Suma", "+");
                 break;
             case '-':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                crearToken(tokens, line, _char, "Simbolo Resta", "-");
-                if (programText[i+1] != '=')crearToken(tokens, line, _char, "Simbolo Resta", "-");
-                else {cadena.clear();opLogico = true; cadena+=c;}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador Resta directa", "-=");
+                    opLogico = false;i++;
+                }
+                else if (programText[i + 1] == '-'){
+                    crearToken(tokens, line, _char, "Operador Restar 1", "--");i++;
+                }
+                else
+                    crearToken(tokens, line, _char, "Simbolo Resta", "-");
                 break;
             case '%':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                crearToken(tokens, line, _char, "Simbolo Residuo", "%");
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador Residuo directo", "%=");
+                    opLogico = false;i++;
+                }
+                else crearToken(tokens, line, _char, "Simbolo Residuo", "%");
                 break;
             case '!':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                if (programText[i+1] != '=')crearToken(tokens, line, _char, "Simbolo Op Logico NOT", "-");
-                else {cadena.clear();opLogico = true; cadena+=c;}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador Logico Distinto de", "!=");
+                    opLogico = false;i++;
+                }
+                else
+                    crearToken(tokens, line, _char, "Operador logico NOT", "!");
                 break;
             case '&':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                crearToken(tokens, line, _char, "Simbolo Op. Logico AND", "&");
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                {
+                    opLogico = (i < programText.length() - 1) && (programText[i + 1] == '&');
+                }
+
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador lógico AND", "&&");
+                    opLogico = false;i++;
+                }
+                else
+                {
+                    crearToken(tokens, line, _char, "Simbolo AND invalido", "&");
+                }
                 break;
+
             case '|':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                {
+                    opLogico = (i < programText.length() - 1) && (programText[i + 1] == '|');
+                }
+
                 if (opLogico)
                 {
-                    if (cadena == "|")
-                    {cadena += c;crearToken(tokens, line, _char, "Simbolo Op. Logico OR", "|");opLogico = false;cadena.clear();}
-                }else
-                // crearToken(tokens, line, _char, "Simbolo Op. Logico OR", "|");
-                opLogico = true;
+                    crearToken(tokens, line, _char, "Operador lógico OR", "||");
+                    opLogico = false;i++;
+                }
+                else
+                {
+                    crearToken(tokens, line, _char, "Simbolo OR invalido", "|");
+                }
                 break;
+            case '=':
+                // Stream de cadena
+                if (enID)
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
+                if (enNum)
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                {
+                    opLogico = (i < programText.length() - 1) && (programText[i + 1] == '=');
+                }
+
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador lógico Igual Que", "==");
+                    opLogico = false;
+                    i++;
+                }
+                else
+                {
+                    crearToken(tokens, line, _char, "Simbolo de Asignacion", "=");
+                }
+                break;
+
             case ':':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+
                 crearToken(tokens, line, _char, "Simbolo para Tipado", ":");
                 break;
             case '>':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
+                }
                 if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
                 if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador lógico Mayor Igual Que", ">=");
+                    opLogico = false;
+                    i++;
+                }
+                else
+                    crearToken(tokens, line, _char, "Simbolor Mayor Que", ">");
                 opLogico = true;
-                else{}
-                crearToken(tokens, line, _char, "Simbolor Mayor Que", ">");
+                cadena += c;
                 break;
+
             case '<':
                 // Stream de cadena
                 if (enID)
-                {crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);enID = false;cadena.clear();}
-                if (enNum)
-                {crearToken(tokens, line, _char, "Numero", cadena);enNum = false;cadena.clear();}
-                crearToken(tokens, line, _char, "Simbolor Menor Que", "<");
-                break;
-            default:
-                if (enCadena)
                 {
-                    cadena += c; // Continuar acumulando caracteres dentro de la cadena
+                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    enID = false;
+                    cadena.clear();
                 }
-                // Si es una letra:
-                if (isLetter(c) || isUnderscore(c))
+                if (enNum)
+                {
+                    crearToken(tokens, line, _char, "Numero", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (!opLogico)
+                    opLogico = programText[i + 1] == '=';
+                if (opLogico)
+                {
+                    crearToken(tokens, line, _char, "Operador Menor Igual Que", "<=");
+                    opLogico = false;i++;
+                }
+                else
+                    crearToken(tokens, line, _char, "Simbolor Menor Que", "<");
+                opLogico = true;
+                cadena += c;
+                break;
+
+            default:
+                if (enCadena){cadena += c;}
+                else if (isLetter(c) || isUnderscore(c))
                 {
                     // Stream de identificador/keyword
                     if (!enID)
@@ -732,6 +964,28 @@ void lexu()
                     }
                     cadena += c;
                 }
+                else if (c == '=')
+                {
+                    // Operador de igualdad "=="
+                    if (programText[i + 1] == '=')
+                    {
+                        crearToken(tokens, line, _char, "Operador de Igualdad", "==");
+                        cadena.clear();
+                        opLogico = true; // Establece la bandera para operadores lógicos
+                        i++;             // Avanzar un carácter adicional para omitir el segundo "="
+                    }
+                    else
+                    {
+                        // Simbolo de asignacion "="
+                        crearToken(tokens, line, _char, "Simbolo de Asignacion", "=");
+                    }
+                }
+                else
+                {
+                    // Si no coincide con ninguna categoría conocida, consideramos el carácter como un token separado
+                    crearToken(tokens, line, _char, "Token Desconocido", std::string(1, c));
+                }
+                break;
             }
         }
         _char++;
@@ -741,7 +995,10 @@ void lexu()
     for (token &t : tokens)
     {
 
-        if (t.tipo == "Cadena"){t.valor = '"' + t.valor + '"';}
+        if (t.tipo == "Cadena")
+        {
+            t.valor = '"' + t.valor + '"';
+        }
         else
         {
         }
