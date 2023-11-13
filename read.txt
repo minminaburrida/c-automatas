@@ -1,2 +1,1 @@
-#Utilizame como playground
-hi im daisy
+pico =32

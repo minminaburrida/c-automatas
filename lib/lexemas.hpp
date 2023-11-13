@@ -480,7 +480,7 @@ string id_or_keyword(string _)
     }
     return "Identificador";
 }
-void lexu()
+std::vector<token> analizadorLexico()
 {
     std::string programText = read_file();
     bool enCadena = false;
@@ -643,10 +643,13 @@ void lexu()
                 if (opLogico)
                 {
                     crearToken(tokens, line, _char, "Operador Multiplicacion directa", "*=");
-                    opLogico = false;i++;
+                    opLogico = false;
+                    i++;
                 }
-                else if (programText[i + 1] == '*'){
-                    crearToken(tokens, line, _char, "Operador Multiplicar al Cuadrado", "**");i++;
+                else if (programText[i + 1] == '*')
+                {
+                    crearToken(tokens, line, _char, "Operador Multiplicar al Cuadrado", "**");
+                    i++;
                 }
                 else
                     crearToken(tokens, line, _char, "Simbolo Multiplicacion", "*");
@@ -670,7 +673,8 @@ void lexu()
                 if (opLogico)
                 {
                     crearToken(tokens, line, _char, "Operador Division directa", "/=");
-                    opLogico = false;i++;
+                    opLogico = false;
+                    i++;
                 }
                 else
                     crearToken(tokens, line, _char, "Simbolo Division", "/");
@@ -694,10 +698,13 @@ void lexu()
                 if (opLogico)
                 {
                     crearToken(tokens, line, _char, "Operador Suma directa", "+=");
-                    opLogico = false;i++;
+                    opLogico = false;
+                    i++;
                 }
-                else if (programText[i + 1] == '+'){
-                    crearToken(tokens, line, _char, "Operador Sumar 1", "++");i++;
+                else if (programText[i + 1] == '+')
+                {
+                    crearToken(tokens, line, _char, "Operador Sumar 1", "++");
+                    i++;
                 }
                 else
                     crearToken(tokens, line, _char, "Simbolo Suma", "+");
@@ -721,10 +728,13 @@ void lexu()
                 if (opLogico)
                 {
                     crearToken(tokens, line, _char, "Operador Resta directa", "-=");
-                    opLogico = false;i++;
+                    opLogico = false;
+                    i++;
                 }
-                else if (programText[i + 1] == '-'){
-                    crearToken(tokens, line, _char, "Operador Restar 1", "--");i++;
+                else if (programText[i + 1] == '-')
+                {
+                    crearToken(tokens, line, _char, "Operador Restar 1", "--");
+                    i++;
                 }
                 else
                     crearToken(tokens, line, _char, "Simbolo Resta", "-");
@@ -748,9 +758,11 @@ void lexu()
                 if (opLogico)
                 {
                     crearToken(tokens, line, _char, "Operador Residuo directo", "%=");
-                    opLogico = false;i++;
+                    opLogico = false;
+                    i++;
                 }
-                else crearToken(tokens, line, _char, "Simbolo Residuo", "%");
+                else
+                    crearToken(tokens, line, _char, "Simbolo Residuo", "%");
                 break;
             case '!':
                 // Stream de cadena
@@ -771,7 +783,8 @@ void lexu()
                 if (opLogico)
                 {
                     crearToken(tokens, line, _char, "Operador Logico Distinto de", "!=");
-                    opLogico = false;i++;
+                    opLogico = false;
+                    i++;
                 }
                 else
                     crearToken(tokens, line, _char, "Operador logico NOT", "!");
@@ -797,8 +810,9 @@ void lexu()
 
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador lógico AND", "&&");
-                    opLogico = false;i++;
+                    crearToken(tokens, line, _char, "Operador logico AND", "&&");
+                    opLogico = false;
+                    i++;
                 }
                 else
                 {
@@ -827,8 +841,9 @@ void lexu()
 
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador lógico OR", "||");
-                    opLogico = false;i++;
+                    crearToken(tokens, line, _char, "Operador logico OR", "||");
+                    opLogico = false;
+                    i++;
                 }
                 else
                 {
@@ -856,7 +871,7 @@ void lexu()
 
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador lógico Igual Que", "==");
+                    crearToken(tokens, line, _char, "Operador logico Igual Que", "==");
                     opLogico = false;
                     i++;
                 }
@@ -901,7 +916,7 @@ void lexu()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador lógico Mayor Igual Que", ">=");
+                    crearToken(tokens, line, _char, "Operador logico Mayor Igual Que", ">=");
                     opLogico = false;
                     i++;
                 }
@@ -930,7 +945,8 @@ void lexu()
                 if (opLogico)
                 {
                     crearToken(tokens, line, _char, "Operador Menor Igual Que", "<=");
-                    opLogico = false;i++;
+                    opLogico = false;
+                    i++;
                 }
                 else
                     crearToken(tokens, line, _char, "Simbolor Menor Que", "<");
@@ -939,7 +955,10 @@ void lexu()
                 break;
 
             default:
-                if (enCadena){cadena += c;}
+                if (enCadena)
+                {
+                    cadena += c;
+                }
                 else if (isLetter(c) || isUnderscore(c))
                 {
                     // Stream de identificador/keyword
@@ -992,23 +1011,109 @@ void lexu()
     }
 
     // Imprimir los tokens encontrados
-    for (token &t : tokens)
-    {
+    return tokens;
+}
+class AnalizadorSintactico {
+public:
+    AnalizadorSintactico(const std::vector<token>& tokens) : tokens(tokens), pos(0) {}
 
-        if (t.tipo == "Cadena")
-        {
-            t.valor = '"' + t.valor + '"';
+    void analizar() {
+        // El punto de entrada del análisis sintáctico
+        while (pos < tokens.size() && tokens[pos].tipo != "Fin de Archivo") {
+            instruccion();
         }
-        else
-        {
-        }
-        std::cout << "Tipo de token: " << t.tipo << '\n';
-        std::cout << "Valor: ";
-        if (t.valor == "\n")
-            std::cout << "\\n"
-                      << '\n';
-        else
-            std::cout << t.valor << "\n";
-        std::cout << "Ubicacion: Linea " << t.linea << ":" << t.caracter << "\n\n";
     }
+
+private:
+    const std::vector<token>& tokens;
+    size_t pos;
+
+    void emparejar(const std::string& tipo_esperado) {
+        if (pos < tokens.size() && tokens[pos].tipo == tipo_esperado) {
+            ++pos;
+        } else {
+            std::string error_msg = "Error de sintaxis. Se esperaba: " + tipo_esperado +
+                                    ", pero se encontro: " + (pos < tokens.size() ? tokens[pos].tipo : "fin de archivo") +
+                                    " en la linea " + std::to_string(tokens[pos].linea);
+            throw std::runtime_error(error_msg);
+        }
+    }
+
+    void instruccion() {
+        if (tokens[pos].tipo == "Identificador") {
+            emparejar("Identificador");
+            emparejar("Simbolo de Asignacion");
+            expresion();
+            emparejar("Salto de Linea");
+        } else {
+            // Manejar otros tipos de instrucciones o errores
+            throw std::runtime_error("Error de sintaxis. Se esperaba una instruccion.");
+        }
+    }
+
+    void expresion() {
+        // Asume que una expresión comienza con un término
+        termino();
+        
+        // Mientras el siguiente token sea un operador, procesa otro término
+        while (pos < tokens.size() && esOperador(tokens[pos].tipo)) {
+            emparejar(tokens[pos].tipo); // Operador
+            termino();
+        }
+    }
+
+    void termino() {
+        if (tokens[pos].tipo == "Numero" || tokens[pos].tipo == "Identificador") {
+            emparejar(tokens[pos].tipo);
+        } else {
+            throw std::runtime_error("Error de sintaxis. Se esperaba un termino.");
+        }
+    }
+
+    bool esOperador(const std::string& tipo) {
+        return tipo == "Simbolo Suma" || tipo == "Simbolo Resta" ||
+               tipo == "Simbolo Multiplicacion" || tipo == "Simbolo Division";
+    }
+};
+
+void sint()
+{
+    cout<<"En el codigo\n\""<<read_file()<<"\"\n";
+    std::vector<token> tokens = analizadorLexico();
+    try
+    {
+        AnalizadorSintactico analizador(tokens);
+        analizador.analizar();
+        std::cout << "Analisis sintactico exitoso.\n";
+    }
+    catch (const std::runtime_error &e)
+    {
+        std::cerr << "Error durante el analisis sintactico: " << e.what() << "\n";
+    }
+}
+
+void lexu()
+{
+    sint();
+    // std::vector<token> tokens = analizadorLexico();
+    // for (token &t : tokens)
+    // {
+
+    //     if (t.tipo == "Cadena")
+    //     {
+    //         t.valor = '"' + t.valor + '"';
+    //     }
+    //     else
+    //     {
+    //     }
+    //     std::cout << "Tipo de token: " << t.tipo << '\n';
+    //     std::cout << "Valor: ";
+    //     if (t.valor == "\n")
+    //         std::cout << "\\n"
+    //                   << '\n';
+    //     else
+    //         std::cout << t.valor << "\n";
+    //     std::cout << "Ubicacion: Linea " << t.linea << ":" << t.caracter << "\n\n";
+    // }
+
 }
