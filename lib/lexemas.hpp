@@ -454,15 +454,17 @@ struct token
     int linea;
     int caracter;
     std::string tipo;
+    std::string tipo_short;
     std::string valor;
 };
 std::vector<token> tokens;
-void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::string &tipo, const std::string &valor)
+void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::string &tipo, const std::string &tipo_short, const std::string &valor)
 {
     token nuevoToken;
     nuevoToken.linea = line;
     nuevoToken.caracter = _char - valor.length();
     nuevoToken.tipo = tipo;
+    nuevoToken.tipo_short = tipo;
     nuevoToken.valor = valor;
     tokens.push_back(nuevoToken);
 }
@@ -509,7 +511,7 @@ std::vector<token> analizadorLexico()
                 {
                     enCadena = false;
                     // Crear un token de cadena
-                    crearToken(tokens, line, _char, "Cadena", cadena);
+                    crearToken(tokens, line, _char, "Cadena", "STR", cadena);
                     cadena.clear();
                 }
             }
@@ -527,13 +529,16 @@ std::vector<token> analizadorLexico()
                 // Manejo de espacios
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -541,11 +546,11 @@ std::vector<token> analizadorLexico()
                 {
                     if (cadena == "&&")
                     {
-                        crearToken(tokens, line, line, "Operador logico AND", "&&");
+                        crearToken(tokens, line, line, "Operador logico AND", "LOP", "&&");
                     }
                     if (cadena == "||")
                     {
-                        crearToken(tokens, line, line, "Operador logico OR", "||");
+                        crearToken(tokens, line, line, "Operador logico OR", "LOP", "||");
                     }
                     cadena.clear();
                     opLogico = false;
@@ -556,17 +561,20 @@ std::vector<token> analizadorLexico()
                 // Manejo de saltos de línea
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
-                crearToken(tokens, line, _char, "Salto de Linea", "\n");
+                crearToken(tokens, line, _char, "Salto de Linea", "ENDL", "\n");
                 cadena.clear();
                 opLogico = false; // Reiniciar la bandera de operador lógico
                 line++;
@@ -577,47 +585,56 @@ std::vector<token> analizadorLexico()
                 // Manejo de paréntesis izquierdos
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "num", cadena);
                     enNum = false;
                     cadena.clear();
                 }
-                crearToken(tokens, line, _char, "Inicio de grupo", "(");
+                crearToken(tokens, line, _char, "Inicio de grupo", "(", "(");
                 break;
 
             case ')':
                 // Manejo de paréntesis derechos
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
-                crearToken(tokens, line, _char, "Simbolo Fin de grupo", ")");
+                crearToken(tokens, line, _char, "Simbolo Fin de grupo", ")", ")");
                 break;
 
             case '"':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -628,13 +645,16 @@ std::vector<token> analizadorLexico()
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -642,29 +662,32 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Multiplicacion directa", "*=");
+                    crearToken(tokens, line, _char, "Operador Multiplicacion directa", "DOP", "*=");
                     opLogico = false;
                     i++;
                 }
                 else if (programText[i + 1] == '*')
                 {
-                    crearToken(tokens, line, _char, "Operador Multiplicar al Cuadrado", "**");
+                    crearToken(tokens, line, _char, "Operador Multiplicar al Cuadrado", "OP", "**");
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Simbolo Multiplicacion", "*");
+                    crearToken(tokens, line, _char, "Simbolo Multiplicacion", "DOP", "*");
                 break;
             case '/':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -672,24 +695,27 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Division directa", "/=");
+                    crearToken(tokens, line, _char, "Operador Division directa", "DOP", "/=");
                     opLogico = false;
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Simbolo Division", "/");
+                    crearToken(tokens, line, _char, "Simbolo Division", "OP", "/");
                 break;
             case '+':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -697,29 +723,32 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Suma directa", "+=");
+                    crearToken(tokens, line, _char, "Operador Suma directa", "DOP", "+=");
                     opLogico = false;
                     i++;
                 }
                 else if (programText[i + 1] == '+')
                 {
-                    crearToken(tokens, line, _char, "Operador Sumar 1", "++");
+                    crearToken(tokens, line, _char, "Operador Sumar 1", "UOP", "++");
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Simbolo Suma", "+");
+                    crearToken(tokens, line, _char, "Simbolo Suma", "OP", "+");
                 break;
             case '-':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -727,29 +756,32 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Resta directa", "-=");
+                    crearToken(tokens, line, _char, "Operador Resta directa", "DOP", "-=");
                     opLogico = false;
                     i++;
                 }
                 else if (programText[i + 1] == '-')
                 {
-                    crearToken(tokens, line, _char, "Operador Restar 1", "--");
+                    crearToken(tokens, line, _char, "Operador Restar 1", "UOP", "--");
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Simbolo Resta", "-");
+                    crearToken(tokens, line, _char, "Simbolo Resta", "OP", "-");
                 break;
             case '%':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -757,24 +789,27 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Residuo directo", "%=");
+                    crearToken(tokens, line, _char, "Operador Residuo directo", "DOP", "%=");
                     opLogico = false;
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Simbolo Residuo", "%");
+                    crearToken(tokens, line, _char, "Simbolo Residuo", "OP", "%");
                 break;
             case '!':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -782,24 +817,27 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Logico Distinto de", "!=");
+                    crearToken(tokens, line, _char, "Operador Logico Distinto de", "LOP", "!=");
                     opLogico = false;
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Operador logico NOT", "!");
+                    crearToken(tokens, line, _char, "Operador logico NOT", "NOT", "!");
                 break;
             case '&':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -810,13 +848,13 @@ std::vector<token> analizadorLexico()
 
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador logico AND", "&&");
+                    crearToken(tokens, line, _char, "Operador logico AND", "LOP", "&&");
                     opLogico = false;
                     i++;
                 }
                 else
                 {
-                    crearToken(tokens, line, _char, "Simbolo AND invalido", "&");
+                    crearToken(tokens, line, _char, "Simbolo AND invalido", "NLOP", "&");
                 }
                 break;
 
@@ -824,13 +862,16 @@ std::vector<token> analizadorLexico()
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -841,26 +882,29 @@ std::vector<token> analizadorLexico()
 
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador logico OR", "||");
+                    crearToken(tokens, line, _char, "Operador logico OR", "LOP", "||");
                     opLogico = false;
                     i++;
                 }
                 else
                 {
-                    crearToken(tokens, line, _char, "Simbolo OR invalido", "|");
+                    crearToken(tokens, line, _char, "Simbolo OR invalido", "NLOP", "|");
                 }
                 break;
             case '=':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -871,13 +915,13 @@ std::vector<token> analizadorLexico()
 
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador logico Igual Que", "==");
+                    crearToken(tokens, line, _char, "Operador logico Igual Que", "ROP", "==");
                     opLogico = false;
                     i++;
                 }
                 else
                 {
-                    crearToken(tokens, line, _char, "Simbolo de Asignacion", "=");
+                    crearToken(tokens, line, _char, "Simbolo de Asignacion", "EQUAL", "=");
                 }
                 break;
 
@@ -885,30 +929,36 @@ std::vector<token> analizadorLexico()
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
 
-                crearToken(tokens, line, _char, "Simbolo para Tipado", ":");
+                crearToken(tokens, line, _char, "Simbolo para Tipado","TYPE", ":");
                 break;
             case '>':
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -916,12 +966,12 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador logico Mayor Igual Que", ">=");
+                    crearToken(tokens, line, _char, "Operador logico Mayor Igual Que", "ROP", ">=");
                     opLogico = false;
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Simbolor Mayor Que", ">");
+                    crearToken(tokens, line, _char, "Simbolor Mayor Que", "ROP", ">");
                 opLogico = true;
                 cadena += c;
                 break;
@@ -930,13 +980,16 @@ std::vector<token> analizadorLexico()
                 // Stream de cadena
                 if (enID)
                 {
-                    crearToken(tokens, line, _char, id_or_keyword(cadena), cadena);
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
                     enID = false;
                     cadena.clear();
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", cadena);
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -944,12 +997,12 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Menor Igual Que", "<=");
+                    crearToken(tokens, line, _char, "Operador Menor Igual Que", "ROP", "<=");
                     opLogico = false;
                     i++;
                 }
                 else
-                    crearToken(tokens, line, _char, "Simbolor Menor Que", "<");
+                    crearToken(tokens, line, _char, "Simbolor Menor Que", "ROP", "<");
                 opLogico = true;
                 cadena += c;
                 break;
@@ -988,7 +1041,7 @@ std::vector<token> analizadorLexico()
                     // Operador de igualdad "=="
                     if (programText[i + 1] == '=')
                     {
-                        crearToken(tokens, line, _char, "Operador de Igualdad", "==");
+                        crearToken(tokens, line, _char, "Operador de Igualdad", "ROP", "==");
                         cadena.clear();
                         opLogico = true; // Establece la bandera para operadores lógicos
                         i++;             // Avanzar un carácter adicional para omitir el segundo "="
@@ -996,13 +1049,13 @@ std::vector<token> analizadorLexico()
                     else
                     {
                         // Simbolo de asignacion "="
-                        crearToken(tokens, line, _char, "Simbolo de Asignacion", "=");
+                        crearToken(tokens, line, _char, "Simbolo de Asignacion", "EQUAL", "=");
                     }
                 }
                 else
                 {
                     // Si no coincide con ninguna categoría conocida, consideramos el carácter como un token separado
-                    crearToken(tokens, line, _char, "Token Desconocido", std::string(1, c));
+                    crearToken(tokens, line, _char, "Token Desconocido", "?", std::string(1, c));
                 }
                 break;
             }
@@ -1013,25 +1066,32 @@ std::vector<token> analizadorLexico()
     // Imprimir los tokens encontrados
     return tokens;
 }
-class AnalizadorSintactico {
+class AnalizadorSintactico
+{
 public:
-    AnalizadorSintactico(const std::vector<token>& tokens) : tokens(tokens), pos(0) {}
+    AnalizadorSintactico(const std::vector<token> &tokens) : tokens(tokens), pos(0) {}
 
-    void analizar() {
+    void analizar()
+    {
         // El punto de entrada del análisis sintáctico
-        while (pos < tokens.size() && tokens[pos].tipo != "Fin de Archivo") {
+        while (pos < tokens.size() && tokens[pos].tipo != "Fin de Archivo")
+        {
             instruccion();
         }
     }
 
 private:
-    const std::vector<token>& tokens;
+    const std::vector<token> &tokens;
     size_t pos;
 
-    void emparejar(const std::string& tipo_esperado) {
-        if (pos < tokens.size() && tokens[pos].tipo == tipo_esperado) {
+    void emparejar(const std::string &tipo_esperado)
+    {
+        if (pos < tokens.size() && tokens[pos].tipo == tipo_esperado)
+        {
             ++pos;
-        } else {
+        }
+        else
+        {
             std::string error_msg = "Error de sintaxis. Se esperaba: " + tipo_esperado +
                                     ", pero se encontro: " + (pos < tokens.size() ? tokens[pos].tipo : "fin de archivo") +
                                     " en la linea " + std::to_string(tokens[pos].linea);
@@ -1039,46 +1099,57 @@ private:
         }
     }
 
-    void instruccion() {
-        if (tokens[pos].tipo == "Identificador") {
+    void instruccion()
+    {
+        if (tokens[pos].tipo == "Identificador")
+        {
             emparejar("Identificador");
             emparejar("Simbolo de Asignacion");
             expresion();
             emparejar("Salto de Linea");
-        } else {
+        }
+        else
+        {
             // Manejar otros tipos de instrucciones o errores
             throw std::runtime_error("Error de sintaxis. Se esperaba una instruccion.");
         }
     }
 
-    void expresion() {
+    void expresion()
+    {
         // Asume que una expresión comienza con un término
         termino();
-        
+
         // Mientras el siguiente token sea un operador, procesa otro término
-        while (pos < tokens.size() && esOperador(tokens[pos].tipo)) {
+        while (pos < tokens.size() && esOperador(tokens[pos].tipo))
+        {
             emparejar(tokens[pos].tipo); // Operador
             termino();
         }
     }
 
-    void termino() {
-        if (tokens[pos].tipo == "Numero" || tokens[pos].tipo == "Identificador") {
+    void termino()
+    {
+        if (tokens[pos].tipo == "Numero" || tokens[pos].tipo == "Identificador")
+        {
             emparejar(tokens[pos].tipo);
-        } else {
+        }
+        else
+        {
             throw std::runtime_error("Error de sintaxis. Se esperaba un termino.");
         }
     }
 
-    bool esOperador(const std::string& tipo) {
+    bool esOperador(const std::string &tipo)
+    {
         return tipo == "Simbolo Suma" || tipo == "Simbolo Resta" ||
                tipo == "Simbolo Multiplicacion" || tipo == "Simbolo Division";
     }
 };
 
-void sint()
+void analisisSintactico()
 {
-    cout<<"En el codigo\n\""<<read_file()<<"\"\n";
+    cout << "En el codigo\n\"" << read_file() << "\"\n";
     std::vector<token> tokens = analizadorLexico();
     try
     {
@@ -1094,7 +1165,7 @@ void sint()
 
 void lexu()
 {
-    sint();
+    analisisSintactico();
     // std::vector<token> tokens = analizadorLexico();
     // for (token &t : tokens)
     // {
@@ -1115,5 +1186,4 @@ void lexu()
     //         std::cout << t.valor << "\n";
     //     std::cout << "Ubicacion: Linea " << t.linea << ":" << t.caracter << "\n\n";
     // }
-
 }
