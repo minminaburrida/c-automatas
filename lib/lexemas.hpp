@@ -943,7 +943,7 @@ std::vector<token> analizadorLexico()
                     cadena.clear();
                 }
 
-                crearToken(tokens, line, _char, "Simbolo para Tipado","TYPE", ":");
+                crearToken(tokens, line, _char, "Simbolo para Tipado", "TYPE", ":");
                 break;
             case '>':
                 // Stream de cadena
@@ -1098,40 +1098,74 @@ private:
             throw std::runtime_error(error_msg);
         }
     }
+    void _emparejar(const std::string &tipo_esperado)
+    {
+        cout << "\n_" << tokens[pos].valor << "_\n";
+        if (pos < tokens.size() && tokens[pos].tipo_short == tipo_esperado)
+        {
+            ++pos;
+        }
+        else
+        {
+            std::string error_msg = "Error de sintaxis. Se esperaba: " + tipo_esperado +
+                                    ", pero se encontro: " + (pos < tokens.size() ? tokens[pos].tipo : "fin de archivo") +
+                                    " en la linea " + std::to_string(tokens[pos].linea);
+            throw std::runtime_error(error_msg);
+        }
+    }
 
     void instruccion()
     {
-        if (tokens[pos].tipo == "Identificador")
+        if (tokens[pos].tipo == "Palabra Reservada")
         {
-            emparejar("Identificador");
-            emparejar("Simbolo de Asignacion");
-            expresion();
-            emparejar("Salto de Linea");
+            if (tokens[pos].valor == "Si")
+            {
+                _emparejar("PR");
+                _emparejar("(");
+                expresion();
+                _emparejar(")");
+                // cout << "\n_Funciona\n_";
+            }
+            else
+            {
+            }
+            _emparejar("ENDL");
         }
         else
         {
             // Manejar otros tipos de instrucciones o errores
-            throw std::runtime_error("Error de sintaxis. Se esperaba una instruccion.");
+            std::cerr << "Error en el índice " << pos << ": ";
+            throw std::runtime_error("Error de sintaxis. Se esperaba una instrucción Si.");
         }
     }
 
     void expresion()
-    {
-        // Asume que una expresión comienza con un término
-        termino();
+{
+    // Asume que una expresión comienza con un término
+    termino();
 
-        // Mientras el siguiente token sea un operador, procesa otro término
-        while (pos < tokens.size() && esOperador(tokens[pos].tipo))
-        {
-            emparejar(tokens[pos].tipo); // Operador
-            termino();
-        }
+    // Mientras el siguiente token sea un operador lógico, procesa otro término
+    while (pos < tokens.size() && esOperadorLogico(tokens[pos].tipo))
+    {
+        cout << "\n_" << tokens[pos].valor << "_\n";
+        emparejar(tokens[pos].tipo); // Operador lógico
+        termino();
     }
+}
+
+bool esOperadorLogico(const std::string &tipo)
+{
+    return tipo == "Operador Comparacion" || tipo == "Operador logico Igual Que" ||
+           tipo == "Operador logico Diferente de" || tipo == "Operador logico AND";
+    /* Otros operadores lógicos */
+}
+
 
     void termino()
     {
-        if (tokens[pos].tipo == "Numero" || tokens[pos].tipo == "Identificador")
+        if (tokens[pos].tipo == "Identificador" || tokens[pos].tipo == "Operador Comparacion")
         {
+            cout << "\n_" << tokens[pos].valor << "_\n";
             emparejar(tokens[pos].tipo);
         }
         else
