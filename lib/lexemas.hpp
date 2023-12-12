@@ -468,18 +468,24 @@ void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::st
     nuevoToken.valor = valor;
     tokens.push_back(nuevoToken);
 }
+
+std::vector<std::string> tiposDeDato = {"Entero", "Decimal", "Caracter", "Cadena"};
 std::vector<std::string> palabrasReservadas = {
-    "Si", "Sino", "Mientras", "Para", "Hacer", "Entero", "Decimal", "Entonces"
-                                                                    "Caracter",
-    "Cadena", "Retornar", "Romper", "Repetir", "Nuevo",
+    "Si", "Sino", "Mientras", "Para", "Hacer", "Entonces",
+    "Retornar", "Romper", "Repetir", "Nuevo",
     "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
+
+// std::palabrasReservadas.insert(palabrasReservadas.end(), tiposDeDato.begin(), tiposDeDato.end());
+
 string id_or_keyword(string _)
 {
     for (const std::string &palabra : palabrasReservadas)
-    {
         if (_ == palabra)
             return "Palabra Reservada";
-    }
+    for (const std::string &palabra : tiposDeDato)
+        if (_ == palabra)
+            return "Palabra Reservada";
+
     return "Identificador";
 }
 std::vector<token> analizadorLexico()
@@ -817,7 +823,7 @@ std::vector<token> analizadorLexico()
                     opLogico = programText[i + 1] == '=';
                 if (opLogico)
                 {
-                    crearToken(tokens, line, _char, "Operador Logico Distinto de", "LOP", "!=");
+                    crearToken(tokens, line, _char, "Operador Logico Distinto de", "ROP", "!=");
                     opLogico = false;
                     i++;
                 }
@@ -1083,6 +1089,7 @@ public:
 private:
     const std::vector<token> &tokens;
     size_t pos;
+    int groups = 0;
 
     void emparejar(const std::string &tipo_esperado)
     {
@@ -1113,6 +1120,21 @@ private:
             throw std::runtime_error(error_msg);
         }
     }
+    void match(const std::string &tipo_esperado, const std::string &valor)
+    {
+        cout << "\n_" << tokens[pos].valor << "_\n";
+        if (pos < tokens.size() && tokens[pos].tipo_short == tipo_esperado && tokens[pos].valor == valor)
+        {
+            ++pos;
+        }
+        else
+        {
+            std::string error_msg = "Error de sintaxis. Se esperaba: " + tipo_esperado +
+                                    ", pero se encontro: " + (pos < tokens.size() ? tokens[pos].tipo : "fin de archivo") +
+                                    " en la linea " + std::to_string(tokens[pos].linea);
+            throw std::runtime_error(error_msg);
+        }
+    }
 
     void instruccion()
     {
@@ -1122,14 +1144,32 @@ private:
             {
                 _emparejar("PR");
                 _emparejar("(");
-                expresion();
+                condicion();
                 _emparejar(")");
+                if (tokens[pos].valor == "Entonces")
+                    match("PR", "Entonces");
+
                 // cout << "\n_Funciona\n_";
             }
             else
             {
             }
             _emparejar("ENDL");
+        }
+        else if (tokens[pos].tipo_short == "ID")
+        {
+            _emparejar("ID");
+            if (tokens[pos].tipo_short == "TYPE")
+            {
+                _emparejar("TYPE");
+                if (tipoDeDato(tokens[pos].valor))
+                    _emparejar("PR");
+                _emparejar("EQUAL");
+                termino();
+            }
+            else
+            {
+            }
         }
         else
         {
@@ -1138,31 +1178,66 @@ private:
             throw std::runtime_error("Error de sintaxis. Se esperaba una instrucción Si.");
         }
     }
-
-    void expresion()
-{
-    // Asume que una expresión comienza con un término
-    termino();
-
-    // Mientras el siguiente token sea un operador lógico, procesa otro término
-    while (pos < tokens.size() && esOperadorLogico(tokens[pos].tipo))
+    void condicion()
     {
-        cout << "\n_" << tokens[pos].valor << "_\n";
-        emparejar(tokens[pos].tipo); // Operador lógico
-        termino();
+        groups = 0;
+        expresion();
+
+        while (pos < tokens.size() && groups != 0)
+        {
+            if (tokens[pos].tipo_short == ")")
+            {
+                // si siguen grupos sin cerrar
+                if (groups > 0)
+                    groups--;
+                // si se va a cerrar ya, terminar la expresion
+                else
+                    break;
+            }
+            else if (tokens[pos].tipo_short == "LOP")
+            {
+                emparejar("LOP");
+                expresion();
+            }
+            if (tokens[pos].tipo_short == "ENDL")
+                break;
+        }
     }
-}
+    void expresion()
+    {
+        if (tokens[pos].tipo_short == "NOT")
+            _emparejar("NOT");
+        // Asume que una expresión comienza con un término
+        termino();
+        // Mientras el siguiente token sea un operador lógico, procesa otro término
+        while (pos < tokens.size() && esOperadorLogico(tokens[pos].tipo) && tokens[pos].tipo_short == "ENDL")
+        {
+            cout << "\n_" << tokens[pos].valor << "_\n";
+            emparejar(tokens[pos].tipo); // Operador lógico
+            termino();
+        }
+    }
 
-bool esOperadorLogico(const std::string &tipo)
-{
-    return tipo == "Operador Comparacion" || tipo == "Operador logico Igual Que" ||
-           tipo == "Operador logico Diferente de" || tipo == "Operador logico AND";
-    /* Otros operadores lógicos */
-}
-
+    bool esOperadorLogico(const std::string &tipo)
+    {
+        return tipo == "Operador Comparacion" || tipo == "Operador logico Igual Que" ||
+               tipo == "Operador logico Diferente de" || tipo == "Operador logico AND";
+        /* Otros operadores lógicos */
+    }
+    /*
+    "Si", "Sino", "Mientras", "Para", "Hacer", "Entero", "Decimal", "Entonces",
+    "Caracter",
+    "Cadena", "Retornar", "Romper", "Repetir", "Nuevo",
+    "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
+    */
+    bool tipoDeDato(const std::string &tipo)
+    {
+        return std::find(tiposDeDato.begin(), tiposDeDato.end(), tipo) != tiposDeDato.end();
+    }
 
     void termino()
     {
+
         if (tokens[pos].tipo == "Identificador" || tokens[pos].tipo == "Operador Comparacion")
         {
             cout << "\n_" << tokens[pos].valor << "_\n";
@@ -1170,8 +1245,17 @@ bool esOperadorLogico(const std::string &tipo)
         }
         else
         {
-            throw std::runtime_error("Error de sintaxis. Se esperaba un termino.");
+            try {valor();}
+            catch(runtime_error &e)
+                {throw std::runtime_error("Error de sintaxis. Se esperaba un termino.");}
         }
+    }
+    void valor()
+    {
+        if (tokens[pos].tipo_short == "NUM")
+            _emparejar("NUM");
+        else if (tokens[pos].tipo_short == "STR")
+            _emparejar("STR");
     }
 
     bool esOperador(const std::string &tipo)
