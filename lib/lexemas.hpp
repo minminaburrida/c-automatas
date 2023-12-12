@@ -464,7 +464,7 @@ void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::st
     nuevoToken.linea = line;
     nuevoToken.caracter = _char - valor.length();
     nuevoToken.tipo = tipo;
-    nuevoToken.tipo_short = tipo;
+    nuevoToken.tipo_short = tipo_short;
     nuevoToken.valor = valor;
     tokens.push_back(nuevoToken);
 }
