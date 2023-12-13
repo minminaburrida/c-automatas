@@ -1146,6 +1146,7 @@ private:
                 if (tokens[pos].valor == "Entonces")
                     match("PR", "Entonces");
             }
+            // Senencia Leer
             else if (tokens[pos].valor == "Leer")
             {
                 _emparejar("PR");
@@ -1153,6 +1154,7 @@ private:
                 _emparejar("ID");
                 _emparejar(")");
             }
+            // Senencia Imprimir
             else if (tokens[pos].valor == "Imprimir")
             {
                 _emparejar("PR");
@@ -1166,6 +1168,7 @@ private:
             }
             _emparejar("ENDL");
         }
+        // Asignacion y declaracion de variables
         else if (tokens[pos].tipo_short == "ID")
         {
             _emparejar("ID");
