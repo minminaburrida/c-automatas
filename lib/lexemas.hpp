@@ -469,10 +469,8 @@ void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::st
     tokens.push_back(nuevoToken);
 }
 std::vector<std::string> tiposDeDato = {"Entero", "Decimal", "Cadena", "Bit", "Caracter"};
-std::vector<std::string> palabrasReservadas = {
-    "Si", "Sino", "Mientras", "Para", "Hacer", "Entonces",
-    "Retornar", "Romper", "Repetir", "Nuevo",
-    "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
+std::vector<std::string> palabrasReservadas = {"Si", "Sino", "Mientras", "Para", "Hacer", "Entonces", 
+"Retornar", "Romper", "Repetir", "Nuevo", "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
 string id_or_keyword(string _)
 {
     for (const std::string &palabra : tiposDeDato)
@@ -1148,6 +1146,20 @@ private:
                 if (tokens[pos].valor == "Entonces")
                     match("PR", "Entonces");
             }
+            else if (tokens[pos].valor == "Leer")
+            {
+                _emparejar("PR");
+                _emparejar("(");
+                _emparejar("ID");
+                _emparejar(")");
+            }
+            else if (tokens[pos].valor == "Imprimir")
+            {
+                _emparejar("PR");
+                _emparejar("(");
+                expresion(true);
+                _emparejar(")");
+            }
 
             else
             {
@@ -1231,7 +1243,7 @@ private:
     void valorAsignado(bool cierre = false)
     {
 
-        int grupos = cierre?1:0; 
+        int grupos = cierre ? 1 : 0;
         if (tokens[pos].tipo_short == "ENDL")
             throw std::runtime_error("Error de sintaxis: No se encontro valor.");
         while (((grupos >= 0 && !cierre) || (grupos != 0 && cierre)) && tokens[pos].tipo_short != "ENDL")
@@ -1260,7 +1272,7 @@ private:
                 throw std::runtime_error("Error de sintaxis inesperado.");
             }
         }
-            
+
         if (grupos != 0)
             throw std::runtime_error("Error de sintaxis: paréntesis no balanceados.");
 

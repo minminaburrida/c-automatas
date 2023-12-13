@@ -1,3 +1,1 @@
-#Conjunto de cadenas validas
-#a=123
-Si (a == b  && c == d) Entonces
+Escribir(Poronga+"asdas")
