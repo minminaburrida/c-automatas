@@ -469,8 +469,8 @@ void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::st
     tokens.push_back(nuevoToken);
 }
 std::vector<std::string> tiposDeDato = {"Entero", "Decimal", "Cadena", "Bit", "Caracter"};
-std::vector<std::string> palabrasReservadas = {"Si", "Sino", "Mientras", "Para", "Hacer", "Entonces", 
-"Retornar", "Romper", "Repetir", "Nuevo", "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
+std::vector<std::string> palabrasReservadas = {"Si", "Sino", "Mientras", "Para", "Hacer", "Entonces",
+                                               "Retornar", "Romper", "Repetir", "Nuevo", "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
 string id_or_keyword(string _)
 {
     for (const std::string &palabra : tiposDeDato)
@@ -549,15 +549,47 @@ std::vector<token> analizadorLexico()
                 {
                     if (cadena == "&&")
                     {
-                        crearToken(tokens, line, line, "Operador logico AND", "LOP", "&&");
+                        crearToken(tokens, line, _char, "Operador logico AND", "LOP", "&&");
                     }
                     if (cadena == "||")
                     {
-                        crearToken(tokens, line, line, "Operador logico OR", "LOP", "||");
+                        crearToken(tokens, line, _char, "Operador logico OR", "LOP", "||");
                     }
                     cadena.clear();
                     opLogico = false;
                 }
+                break;
+            case ';':
+                // Manejo de espacios
+                if (enID)
+                {
+                    if (id_or_keyword(cadena) == "Palabra Reservada")
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "PR", cadena);
+                    else
+                        crearToken(tokens, line, _char, id_or_keyword(cadena), "ID", cadena);
+                    enID = false;
+                    cadena.clear();
+                }
+                if (enNum)
+                {
+                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
+                    enNum = false;
+                    cadena.clear();
+                }
+                if (opLogico)
+                {
+                    if (cadena == "&&")
+                    {
+                        crearToken(tokens, line, _char, "Operador logico AND", "LOP", "&&");
+                    }
+                    if (cadena == "||")
+                    {
+                        crearToken(tokens, line, _char, "Operador logico OR", "LOP", "||");
+                    }
+                    cadena.clear();
+                    opLogico = false;
+                }
+                crearToken(tokens, line, _char, "Separacion", "ENDS", ";");
                 break;
 
             case '\n':
@@ -1162,6 +1194,18 @@ private:
                 expresion(true);
                 _emparejar(")");
             }
+            else if (tokens[pos].valor == "Para")
+            {
+                _emparejar("PR");
+                _emparejar("(");
+                asignacion();
+                _emparejar("ENDI");
+                expresion();
+                _emparejar("ENDI");
+                instruccion();
+                _emparejar(")");
+                _emparejar("ENDL");
+            }
 
             else
             {
@@ -1171,23 +1215,7 @@ private:
         // Asignacion y declaracion de variables
         else if (tokens[pos].tipo_short == "ID")
         {
-            _emparejar("ID");
-            if (tokens[pos].tipo_short == "TYPE")
-            {
-                _emparejar("TYPE");
-                if (tipoDeDato(tokens[pos].valor))
-                {
-                    _emparejar(tokens[pos].tipo_short);
-                }
-                else
-                {
-                    std::cerr << "Error en el índice " << pos << ": ";
-                    throw std::runtime_error("Error de sintaxis. Se esperaba una instrucción.");
-                }
-            }
-            if (tokens[pos].tipo_short == "EQUAL")
-                _emparejar("EQUAL");
-            valorAsignado();
+            asignacion();
             _emparejar("ENDL");
         }
         else
@@ -1197,7 +1225,26 @@ private:
             throw std::runtime_error("Error de sintaxis. Se esperaba una instrucción.");
         }
     }
-
+    void asignacion()
+    {
+        _emparejar("ID");
+        if (tokens[pos].tipo_short == "TYPE")
+        {
+            _emparejar("TYPE");
+            if (tipoDeDato(tokens[pos].valor))
+            {
+                _emparejar(tokens[pos].tipo_short);
+            }
+            else
+            {
+                std::cerr << "Error en el índice " << pos << ": ";
+                throw std::runtime_error("Error de sintaxis. Se esperaba una instrucción.");
+            }
+        }
+        if (tokens[pos].tipo_short == "EQUAL")
+            _emparejar("EQUAL");
+        valorAsignado();
+    }
     void expresion(bool cierre = false)
     {
         // Asume que una expresión comienza con un término
