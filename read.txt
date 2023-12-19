@@ -1,1 +1,1 @@
-#asd
+suma = 10+5-3*resta

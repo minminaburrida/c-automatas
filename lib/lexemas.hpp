@@ -1,3 +1,9 @@
+//FIXME: Ciclo; For
+//FIXME: IF; Else
+//FIXME: Mensajes de error 
+//FIXME: Estructura de codigo
+//FIXME: Matchear el documento con esto 
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -1108,9 +1114,11 @@ public:
 
     void analizar()
     {
+
         // El punto de entrada del análisis sintáctico
         while (pos < tokens.size() && tokens[pos].tipo != "Fin de Archivo")
         {
+          
             instruccion();
         }
     }
@@ -1175,6 +1183,7 @@ private:
                 _emparejar("(");
                 expresion(true);
                 _emparejar(")");
+
                 if (tokens[pos].valor == "Entonces")
                     match("PR", "Entonces");
             }
