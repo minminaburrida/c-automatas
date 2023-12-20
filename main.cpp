@@ -1,9 +1,14 @@
-#include<iostream>
+#include <iostream>
 using namespace std;
 #include "lib.cpp"
-int main(){
+int main()
+{
+    cout << "Que desea hacer?\n\
+    1-Analisis Lexico\n\
+    Any-Analisis Sintactico\n\
+    >> ";
     // while(true){
-    //     string num = "";
+        string num = "";
     //     cout<<"Que desea hacer?\n\
     //     1- Automata de numeros\n\
     //     2-Automata de variables\n\
@@ -12,7 +17,7 @@ int main(){
     //     5-Automata de cadenas\n\
     //     6-Leer archivo\n\
     //     \t>>";
-    //     getline(cin, num);
+    getline(cin, num);
     //     switch (num[0]){
     //         case '0': return 0;
     //         case '1': automata_numero();break;
@@ -24,6 +29,6 @@ int main(){
     //         default: lester();break;
     //     }
     // }
-    lester();
+    lester(num[0]);
     return 0;
 }

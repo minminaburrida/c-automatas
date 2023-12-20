@@ -1,8 +1,9 @@
-//FIXME: Ciclo; For
-//FIXME: IF; Else
-//FIXME: Mensajes de error 
-//FIXME: Estructura de codigo
-//FIXME: Matchear el documento con esto 
+// FIXME: Ciclo; For / WIP by evie
+// FIXME: IF; Else / Fixed
+// FIXME: Mensajes de error / Fixed
+// FIXME: Estructura de codigo / Fixed
+// FIXME: Matchear el documento con esto / Not started
+// FIXME: Operacion Unaria / Fixed
 
 #include <iostream>
 #include <sstream>
@@ -463,6 +464,14 @@ struct token
     std::string tipo_short;
     std::string valor;
 };
+struct ErrorMsg
+{
+    int line;
+    int character;
+    std::string expected;
+    std::string received;
+    std::string errorType;
+};
 std::vector<token> tokens;
 void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::string &tipo, const std::string &tipo_short, const std::string &valor)
 {
@@ -475,7 +484,7 @@ void crearToken(std::vector<token> &tokens, int &line, int &_char, const std::st
     tokens.push_back(nuevoToken);
 }
 std::vector<std::string> tiposDeDato = {"Entero", "Decimal", "Cadena", "Bit", "Caracter"};
-std::vector<std::string> palabrasReservadas = {"Si", "Sino", "Mientras", "Para", "Hacer", "Entonces",
+std::vector<std::string> palabrasReservadas = {"Si", "Sino", "Mientras", "Para", "Hacer", "Entonces", "Fin",
                                                "Retornar", "Romper", "Repetir", "Nuevo", "Fin", "Programa", "Imprimir", "Leer", "Hasta", "Funcion"};
 string id_or_keyword(string _)
 {
@@ -494,6 +503,7 @@ string id_or_keyword(string _)
 std::vector<token> analizadorLexico()
 {
     std::string programText = read_file();
+    bool enDecimal = false;
     bool enCadena = false;
     bool enID = false;
     bool enNum = false;
@@ -1107,6 +1117,7 @@ std::vector<token> analizadorLexico()
     // Imprimir los tokens encontrados
     return tokens;
 }
+
 class AnalizadorSintactico
 {
 public:
@@ -1114,12 +1125,38 @@ public:
 
     void analizar()
     {
-
-        // El punto de entrada del análisis sintáctico
-        while (pos < tokens.size() && tokens[pos].tipo != "Fin de Archivo")
+        // Verificar el inicio del programa
+        if (tokens[pos].valor == "Programa")
         {
-          
+            _emparejar("PR");
+            _emparejar("ID");
+            _emparejar("ENDL");
+        }
+        else
+        {
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "Programa",
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Cuerpo de programa no valido"};
+        }
+
+        // Analizar instrucciones dentro del programa
+        while (pos < tokens.size() && tokens[pos].valor != "Fin" && tokens[pos + 1].valor != "Programa")
+        {
             instruccion();
+        }
+
+        // Verificar el final del programa
+        if (tokens[pos].valor == "Fin" && tokens[pos + 1].valor == "Programa")
+        {
+            _emparejar("PR");
+            _emparejar("PR");
+            _emparejar("ENDL");
+        }
+        else
+        {
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "Fin Programa",
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Fin de programa no valido"};
         }
     }
 
@@ -1135,10 +1172,9 @@ private:
         }
         else
         {
-            std::string error_msg = "Error de sintaxis. Se esperaba: " + tipo_esperado +
-                                    ", pero se encontro: " + (pos < tokens.size() ? tokens[pos].tipo : "fin de archivo") +
-                                    " en la linea " + std::to_string(tokens[pos].linea);
-            throw std::runtime_error(error_msg);
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, tipo_esperado,
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Error de sintaxis"};
         }
     }
     void _emparejar(const std::string &tipo_esperado)
@@ -1150,10 +1186,9 @@ private:
         }
         else
         {
-            std::string error_msg = "Error de sintaxis. Se esperaba: " + tipo_esperado +
-                                    ", pero se encontro: " + (pos < tokens.size() ? tokens[pos].tipo : "fin de archivo") +
-                                    " en la linea " + std::to_string(tokens[pos].linea);
-            throw std::runtime_error(error_msg);
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, tipo_esperado,
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Error de sintaxis"};
         }
     }
     void match(const std::string &tipo_esperado, const std::string &valor)
@@ -1165,32 +1200,53 @@ private:
         }
         else
         {
-            std::string error_msg = "Error de sintaxis. Se esperaba: " + tipo_esperado +
-                                    ", pero se encontro: " + (pos < tokens.size() ? tokens[pos].tipo : "fin de archivo") +
-                                    " en la linea " + std::to_string(tokens[pos].linea);
-            throw std::runtime_error(error_msg);
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, valor,
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Error de sintaxis"};
         }
     }
-
     void instruccion()
     {
-        // Sentencia if
+        // string _instruccion
+        // Si es Palabra Reservada (Keyword)
         if (tokens[pos].tipo_short == "PR")
         {
-            if (tokens[pos].valor == "Si" || tokens[pos].valor == "Mientras")
+            if (tokens[pos].valor == "Si")
             {
-                _emparejar("PR");
+
+                match("PR", "Si");
                 _emparejar("(");
                 expresion(true);
                 _emparejar(")");
 
                 if (tokens[pos].valor == "Entonces")
                     match("PR", "Entonces");
+                _emparejar("ENDL");
+
+                // Bloque de código para el Si
+                while (tokens[pos].valor != "Fin" && tokens[pos].valor != "Sino")
+                    instruccion();
+
+                // Sino
+                if (tokens[pos].valor == "Sino")
+                {
+                    match("PR", "Sino");
+                    _emparejar("ENDL");
+
+                    // Bloque de código para el Sino
+                    while (tokens[pos].valor != "Fin")
+                        instruccion();
+                }
+
+                // Fin Si
+                match("PR", "Fin");
+                match("PR", "Si");
             }
+
             // Senencia Leer
             else if (tokens[pos].valor == "Leer")
             {
-                _emparejar("PR");
+                match("PR", "Leer");
                 _emparejar("(");
                 _emparejar("ID");
                 _emparejar(")");
@@ -1198,14 +1254,14 @@ private:
             // Senencia Imprimir
             else if (tokens[pos].valor == "Imprimir")
             {
-                _emparejar("PR");
+                match("PR", "Imprimir");
                 _emparejar("(");
                 expresion(true);
                 _emparejar(")");
             }
             else if (tokens[pos].valor == "Para")
             {
-                _emparejar("PR");
+                match("PR", "Para");
                 _emparejar("(");
                 asignacion();
                 _emparejar("ENDI");
@@ -1221,9 +1277,10 @@ private:
             }
             _emparejar("ENDL");
         }
-        // Asignacion y declaracion de variables
+        // Si es Identificador (Variable/ID)
         else if (tokens[pos].tipo_short == "ID")
         {
+
             asignacion();
             _emparejar("ENDL");
         }
@@ -1231,14 +1288,40 @@ private:
         {
             // Manejar otros tipos de instrucciones o errores
             std::cerr << "Error en el índice " << pos << ": ";
-            throw std::runtime_error("Error de sintaxis. Se esperaba una instrucción.");
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "Un token valido",
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Token no valido"};
         }
     }
     void asignacion()
     {
         _emparejar("ID");
-        if (tokens[pos].tipo_short == "TYPE")
+
+        if (tokens[pos].tipo_short == "UOP")
         {
+            // Unary operation (a++, a--)
+            _emparejar("UOP");
+            return;
+        }
+        if (tokens[pos].tipo_short == "DOP")
+        {
+            // Unary operation (a++, a--)
+            _emparejar("DOP");
+            expresion();
+            return;
+        }
+        else if (tokens[pos].tipo_short == "EQUAL")
+        {
+            // Direct assignment (a = <valor>)
+            _emparejar("EQUAL");
+            expresion();
+        }
+        else if (tokens[pos].tipo_short == "PR" && tokens[pos].tipo_short == "TYPE")
+        {
+            // Declaration (declaracion(a:<Tipo de dato> = <valor>))
+            _emparejar("PR");
+            _emparejar("(");
+            _emparejar("ID");
             _emparejar("TYPE");
             if (tipoDeDato(tokens[pos].valor))
             {
@@ -1247,13 +1330,34 @@ private:
             else
             {
                 std::cerr << "Error en el índice " << pos << ": ";
-                throw std::runtime_error("Error de sintaxis. Se esperaba una instrucción.");
+                throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "Un tipo de dato",
+                               pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                               "Tipo de dato no valido"};
             }
-        }
-        if (tokens[pos].tipo_short == "EQUAL")
             _emparejar("EQUAL");
-        valorAsignado();
+            valorAsignado();
+            _emparejar(")");
+        }
+        else if (tokens[pos].tipo_short == "PR" && tokens[pos].valor == "funcion")
+        {
+            // Function call (funcion(a(<parametros separados por comas>)))
+            _emparejar("PR");
+            _emparejar("(");
+            // Process function parameters if needed
+            // You may need to add logic to handle parameters inside the function call
+            // For simplicity, I'm skipping it here
+            _emparejar(")");
+        }
+        else
+        {
+            // Handle other cases or raise an error if needed
+            std::cerr << "Error en el índice " << pos << ": ";
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "una asignacion",
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Asignacion no reconocida"};
+        }
     }
+
     void expresion(bool cierre = false)
     {
         // Asume que una expresión comienza con un término
@@ -1304,7 +1408,9 @@ private:
 
         int grupos = cierre ? 1 : 0;
         if (tokens[pos].tipo_short == "ENDL")
-            throw std::runtime_error("Error de sintaxis: No se encontro valor.");
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "un valor",
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Valor no encontrado"};
         while (((grupos >= 0 && !cierre) || (grupos != 0 && cierre)) && tokens[pos].tipo_short != "ENDL")
         {
             if (tokens[pos].tipo_short == "(")
@@ -1328,12 +1434,16 @@ private:
             }
             else
             {
-                throw std::runtime_error("Error de sintaxis inesperado.");
+                throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "una asignacion",
+                               pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                               "Token Inesperado"};
             }
         }
 
         if (grupos != 0)
-            throw std::runtime_error("Error de sintaxis: paréntesis no balanceados.");
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, ")",
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Parentesis no balanceados"};
 
         // if (cierre)--pos;
     }
@@ -1353,48 +1463,56 @@ private:
         }
         else
         {
-            throw std::runtime_error("Error de sintaxis. Se esperaba un termino.");
+            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "un Termino",
+                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
+                           "Termino no valido"};
         }
     }
 };
 
-void analisisSintactico()
+void analisisSintactico(const std::vector<token> &tokens)
 {
-    cout << "En el codigo\n\"" << read_file() << "\"\n";
-    std::vector<token> tokens = analizadorLexico();
+    std::cout << "En el codigo\n\"" << read_file() << "\"\n";
     try
     {
         AnalizadorSintactico analizador(tokens);
         analizador.analizar();
         std::cout << "\nAnalisis sintactico exitoso.\n";
     }
-    catch (const std::runtime_error &e)
+    catch (const ErrorMsg &e)
     {
-        std::cerr << "Error durante el analisis sintactico: " << e.what() << "\n";
+        std::cerr << "\n\nError durante el analisis:\nLinea " << e.line
+                  << "\nCaracter " << e.character
+                  << "\nTipo de error: " << e.errorType
+                  << "\nSe esperaba: " << (e.expected == "ENDL" ? "Salto de Linea" : e.expected)
+                  << "\npero se encontro: " << e.received << "\n";
     }
 }
-
-void lexu()
+void lexu(char value)
 {
-    analisisSintactico();
-    // std::vector<token> tokens = analizadorLexico();
-    // for (token &t : tokens)
-    // {
+    std::vector<token> tokens = analizadorLexico();
+    if (value == '1')
 
-    //     if (t.tipo == "Cadena")
-    //     {
-    //         t.valor = '"' + t.valor + '"';
-    //     }
-    //     else
-    //     {
-    //     }
-    //     std::cout << "Tipo de token: " << t.tipo << '\n';
-    //     std::cout << "Valor: ";
-    //     if (t.valor == "\n")
-    //         std::cout << "\\n"
-    //                   << '\n';
-    //     else
-    //         std::cout << t.valor << "\n";
-    //     std::cout << "Ubicacion: Linea " << t.linea << ":" << t.caracter << "\n\n";
-    // }
+        for (token &t : tokens)
+        {
+            if (t.tipo == "Cadena")
+            {
+                t.valor = '"' + t.valor + '"';
+            }
+            else
+            {
+            }
+            std::cout << "Tipo de token: " << t.tipo << '\n';
+            std::cout << "Valor: ";
+            if (t.valor == "\n")
+                std::cout << "\\n"
+                          << '\n';
+            else
+                std::cout << t.valor << "\n";
+            std::cout << "Ubicacion: Linea " << t.linea << ":" << t.caracter << "\n\n";
+        }
+    else
+        analisisSintactico(tokens);
+    // std::vector<token> tokens = analizadorLexico();
+    //
 }

@@ -37,7 +37,7 @@ void analisis(){read_file();}
 void leer_archivo(){
     analisis();
 }
-void lester(){lexu();}
+void lester(char val){lexu(val);}
 
     // Probably deprecated LOL
     

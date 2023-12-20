@@ -1,1 +1,6 @@
-suma = 10+5-3*resta
+Programa muejejejent
+    Si(muejejeje==32)
+        a=32.4
+    Sino
+    Fin Si
+Fin Programa
