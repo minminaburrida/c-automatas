@@ -1,6 +1,6 @@
 Programa muejejejent
     Si(muejejeje==32)
-        a=32.4
+        a=32.3+40
     Sino
     Fin Si
 Fin Programa

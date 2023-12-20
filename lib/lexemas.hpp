@@ -5,6 +5,12 @@
 // FIXME: Matchear el documento con esto / Not started
 // FIXME: Operacion Unaria / Fixed
 
+// ADDED:
+/*
+    el greñas me arreglo la deteccion de numeros decimales
+    la kin ayudó con el puerco de programa
+*/
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -557,7 +563,7 @@ std::vector<token> analizadorLexico()
                 }
                 if (enNum)
                 {
-                    crearToken(tokens, line, _char, "Numero", "NUM", cadena);
+                    crearToken(tokens, line, _char, enDecimal ? "Numero Decimal" : "Numero", "NUM", cadena);
                     enNum = false;
                     cadena.clear();
                 }
@@ -1073,9 +1079,8 @@ std::vector<token> analizadorLexico()
                     }
                     cadena += c;
                 }
-                else if (is_number(c))
+                else if (is_number(c) || (c == '.' && is_number(programText[i + 1])))
                 {
-                    // Stream de un número
                     if (!enNum)
                     {
                         if (c == '0')
@@ -1083,9 +1088,28 @@ std::vector<token> analizadorLexico()
                             // puede ser un numero hex/bin con x, o b mayus/minus
                         }
                         enNum = true;
+                        enDecimal = false;
                         cadena.clear();
                     }
-                    cadena += c;
+
+                    if (c == '.')
+                    {
+                        if (enDecimal)
+                        {
+                            crearToken(tokens, line, _char, "Error: Número Decimal Inválido", "ERROR", cadena);
+                            enNum = false;
+                            cadena.clear();
+                        }
+                        else
+                        {
+                            enDecimal = true;
+                            cadena += c;
+                        }
+                    }
+                    else
+                    {
+                        cadena += c;
+                    }
                 }
                 else if (c == '=')
                 {
