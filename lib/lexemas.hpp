@@ -5,10 +5,18 @@
 // FIXME: Matchear el documento con esto / Not started
 // FIXME: Operacion Unaria / Fixed
 
-// ADDED:
+// Historial de esta tonteria:
 /*
-    el greñas me arreglo la deteccion de numeros decimales
-    la kin ayudó con el puerco de programa
+    20 sep - la kin sacó la primera version del documento
+    29 sep - la ibi terminó de analizarlo y le dió feedback de como mejorar el lenguaje
+    07 oct - la kin & el greñas farmearon todo el documento
+    12 oct - la kin & el greñas se farmearon el lexico
+    15 oct - la ibi corrigio las issues ocurridas en el lexico
+    01 nov - la ibi se echó la sintaxis como pudo
+    03 dec - la ibi terminó la sintaxis pero quedó fea, aun le siguio moviendo
+    18 dec - la kin ayudó con el puerco de programa (Programa <name>\n<cuerpo>\n Fin Programa)
+    19 dec - el greñas arreglo la detección de numeros decimales (30.2)
+    19 dec - la kin arregló las sentencias unarias y operaciones directas (a++ --, a+=42)
 */
 
 #include <iostream>
