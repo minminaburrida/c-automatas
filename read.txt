@@ -1,6 +1,7 @@
 Programa muejejejent
-    Si(muejejeje==32)
-        a=32.3+40
-    Sino
-    Fin Si
+    Para(i = 0;i<1;i++)
+        Si(a==32)
+            minmin = 32
+        Fin Si
+    Fin Para
 Fin Programa

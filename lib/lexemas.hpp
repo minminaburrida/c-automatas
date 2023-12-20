@@ -1,22 +1,26 @@
-// FIXME: Ciclo; For / WIP by evie
+// FIXME: Ciclo; For / Fixed
 // FIXME: IF; Else / Fixed
 // FIXME: Mensajes de error / Fixed
 // FIXME: Estructura de codigo / Fixed
 // FIXME: Matchear el documento con esto / Not started
 // FIXME: Operacion Unaria / Fixed
 
+// Issues: No detecta correctamente los operadores
+
 // Historial de esta tonteria:
 /*
-    20 sep - la kin sacó la primera version del documento
-    29 sep - la ibi terminó de analizarlo y le dió feedback de como mejorar el lenguaje
-    07 oct - la kin & el greñas farmearon todo el documento
-    12 oct - la kin & el greñas se farmearon el lexico
-    15 oct - la ibi corrigio las issues ocurridas en el lexico
-    01 nov - la ibi se echó la sintaxis como pudo
-    03 dec - la ibi terminó la sintaxis pero quedó fea, aun le siguio moviendo
-    18 dec - la kin ayudó con el puerco de programa (Programa <name>\n<cuerpo>\n Fin Programa)
+    20 sep - la kinvelI sacó la primera version del documento
+    29 sep - la ibi 🏳️‍⚧️ terminó de analizarlo y le dió feedback de como mejorar el lenguaje
+    07 oct - la kinvelI & el greñas farmearon todo el documento
+    12 oct - la kinvelI & el greñas se farmearon el lexico
+    15 oct - la ibi 🏳️‍⚧️ corrigio las issues ocurridas en el lexico
+    01 nov - la ibi 🏳️‍⚧️ se echó la sintaxis como pudo
+    03 dec - la ibi 🏳️‍⚧️ terminó la sintaxis pero quedó fea, aun le siguio moviendo
+    18 dec - la kinvelI ayudó con el puerco de programa (Programa <name>\n<cuerpo>\n Fin Programa)
     19 dec - el greñas arreglo la detección de numeros decimales (30.2)
-    19 dec - la kin arregló las sentencias unarias y operaciones directas (a++ --, a+=42)
+    19 dec - la kinvelI arregló las sentencias unarias y operaciones directas (a++ --, a+=42)
+    19 dec - la kinvelI mejoró la detección de los ;
+    20 dec - la ibi 🏳️‍⚧️ implementó el ciclo for
 */
 
 #include <iostream>
@@ -1175,6 +1179,7 @@ public:
         while (pos < tokens.size() && tokens[pos].valor != "Fin" && tokens[pos + 1].valor != "Programa")
         {
             instruccion();
+            _emparejar("ENDL");
         }
 
         // Verificar el final del programa
@@ -1257,7 +1262,10 @@ private:
 
                 // Bloque de código para el Si
                 while (tokens[pos].valor != "Fin" && tokens[pos].valor != "Sino")
+                {
                     instruccion();
+                    _emparejar("ENDL");
+                }
 
                 // Sino
                 if (tokens[pos].valor == "Sino")
@@ -1267,7 +1275,10 @@ private:
 
                     // Bloque de código para el Sino
                     while (tokens[pos].valor != "Fin")
+                    {
                         instruccion();
+                        _emparejar("ENDL");
+                    }
                 }
 
                 // Fin Si
@@ -1295,27 +1306,38 @@ private:
             {
                 match("PR", "Para");
                 _emparejar("(");
-                asignacion();
-                _emparejar("ENDI");
+                asignacionFor();
                 expresion();
-                _emparejar("ENDI");
+                _emparejar("ENDS");
                 instruccion();
                 _emparejar(")");
                 _emparejar("ENDL");
+
+                while (tokens[pos].valor != "Fin")
+                {
+                    instruccion();
+                    _emparejar("ENDL");
+                }
+
+                // Fin CabiPara
+                match("PR", "Fin");
+                match("PR", "Para");
             }
 
             else
             {
             }
-            _emparejar("ENDL");
+            // _emparejar("ENDL");
         }
         // Si es Identificador (Variable/ID)
         else if (tokens[pos].tipo_short == "ID")
         {
 
             asignacion();
-            _emparejar("ENDL");
+            // _emparejar("ENDL");
         }
+        else if (tokens[pos].tipo_short == "ENDL")
+            emparejar("ENDL");
         else
         {
             // Manejar otros tipos de instrucciones o errores
@@ -1325,6 +1347,12 @@ private:
                            "Token no valido"};
         }
     }
+    void asignacionFor()
+    {
+        asignacion();       // Procesa la asignación
+        _emparejar("ENDS"); // Asegúrate de manejar el punto y coma
+    }
+
     void asignacion()
     {
         _emparejar("ID");
@@ -1348,7 +1376,7 @@ private:
             _emparejar("EQUAL");
             expresion();
         }
-        else if (tokens[pos].tipo_short == "PR" && tokens[pos].tipo_short == "TYPE")
+        else if (tokens[pos].tipo_short == "PR" || tokens[pos].tipo_short == "TYPE")
         {
             // Declaration (declaracion(a:<Tipo de dato> = <valor>))
             _emparejar("PR");
@@ -1370,16 +1398,15 @@ private:
             valorAsignado();
             _emparejar(")");
         }
-        else if (tokens[pos].tipo_short == "PR" && tokens[pos].valor == "funcion")
-        {
-            // Function call (funcion(a(<parametros separados por comas>)))
-            _emparejar("PR");
-            _emparejar("(");
-            // Process function parameters if needed
-            // You may need to add logic to handle parameters inside the function call
-            // For simplicity, I'm skipping it here
-            _emparejar(")");
-        }
+        // else if (tokens[pos].valor == "funcion")
+        // {
+        //     // Function call (funcion(a(<parametros separados por comas>)))
+        //     _emparejar("PR");
+        //     _emparejar("(");
+        //     // Procesar llamada a función
+        //     procesarLlamadaFuncion();
+        //     _emparejar(")");
+        // }
         else
         {
             // Handle other cases or raise an error if needed
@@ -1395,13 +1422,21 @@ private:
         // Asume que una expresión comienza con un término
         valorAsignado(cierre);
 
-        // Mientras el siguiente token sea un operador lógico, procesa otro término
-        while (pos < tokens.size() && esOperadorLogico(tokens[pos].tipo) && tokens[pos].tipo_short != "ENDL")
+        // Mientras el siguiente token sea un operador lógico o punto y coma, procesa otro término
+        while (pos < tokens.size() && (esOperadorLogico(tokens[pos].tipo) || tokens[pos].tipo_short == "ENDS") && tokens[pos].tipo_short != "ENDL")
         {
+            if (tokens[pos].tipo_short == "ENDS" && !cierre)
+            {
+                // Procesar punto y coma
+                // _emparejar("ENDS");
+                break;
+            }
+
             emparejar(tokens[pos].tipo); // Operador lógico
             valorAsignado(cierre);
         }
     }
+
     bool tipoDeDato(string _)
     {
         for (const std::string &palabra : tiposDeDato)
@@ -1437,12 +1472,8 @@ private:
     */
     void valorAsignado(bool cierre = false)
     {
-
         int grupos = cierre ? 1 : 0;
-        if (tokens[pos].tipo_short == "ENDL")
-            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "un valor",
-                           pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
-                           "Valor no encontrado"};
+
         while (((grupos >= 0 && !cierre) || (grupos != 0 && cierre)) && tokens[pos].tipo_short != "ENDL")
         {
             if (tokens[pos].tipo_short == "(")
@@ -1460,6 +1491,12 @@ private:
                     break;
                 }
             }
+            else if (tokens[pos].tipo_short == "ENDS" && !cierre)
+            {
+                // Procesar punto y coma
+                // _emparejar("ENDS");
+                break;
+            }
             else if (esOperador(tokens[pos].tipo_short) || esOperando(tokens[pos].tipo_short))
             {
                 _emparejar(tokens[pos].tipo_short);
@@ -1473,12 +1510,13 @@ private:
         }
 
         if (grupos != 0)
+        {
             throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, ")",
                            pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
                            "Parentesis no balanceados"};
-
-        // if (cierre)--pos;
+        }
     }
+
     bool esOperadorLogico(const std::string &tipo)
     {
         return tipo == "Operador Comparacion" || tipo == "Operador logico Igual Que" ||
