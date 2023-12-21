@@ -1,4 +1,4 @@
-Programa muejejejent
+Programa 323
     Para(i = 0;i<1;i++)
         Si(a==32)
             minmin = 32

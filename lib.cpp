@@ -2,7 +2,6 @@
 #include<cstring>
 #include<string>
 #include"lib/automatas.hpp"
-#include"lib/input_file.hpp"
 #include"lib/lexemas.hpp"
 // #include"./lib/analizador/analizar.h"
 void salida(string _, bool condicion){cout<<_<<" es ";if (!condicion) cout<<"in";cout<<"valido\n";}

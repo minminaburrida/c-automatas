@@ -2,7 +2,7 @@
 // FIXME: IF; Else / Fixed
 // FIXME: Mensajes de error / Fixed
 // FIXME: Estructura de codigo / Fixed
-// FIXME: Matchear el documento con esto / Not started
+// FIXME: Matchear el documento con esto / Partially duh
 // FIXME: Operacion Unaria / Fixed
 
 // Issues: No detecta correctamente los operadores
@@ -1154,6 +1154,8 @@ std::vector<token> analizadorLexico()
     return tokens;
 }
 
+
+//Aqui es majinbu, el analizador sintactico, paparapa
 class AnalizadorSintactico
 {
 public:
@@ -1191,7 +1193,7 @@ public:
         }
         else
         {
-            throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, "Fin Programa",
+            throw ErrorMsg{tokens[pos-1].linea, tokens[pos-1].caracter, "Fin Programa",
                            pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
                            "Fin de programa no valido"};
         }
