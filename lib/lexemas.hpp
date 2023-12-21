@@ -1216,15 +1216,17 @@ private:
                            "Error de sintaxis"};
         }
     }
+    // empareja el tipo esoperado pero AV
     void _emparejar(const std::string &tipo_esperado)
     {
         cout << "\n_" << tokens[pos].valor << " " << tokens[pos].tipo_short;
         if (pos < tokens.size() && tokens[pos].tipo_short == tipo_esperado)
-        {
+
+        { //aumenta nalga
             ++pos;
         }
         else
-        {
+        { //tira el error
             throw ErrorMsg{tokens[pos].linea, tokens[pos].caracter, tipo_esperado,
                            pos < tokens.size() ? tokens[pos].tipo : "fin de archivo",
                            "Error de sintaxis"};
@@ -1257,13 +1259,13 @@ private:
                 _emparejar("(");
                 expresion(true);
                 _emparejar(")");
-
+                //es opcional, literal en el diagrama dice, animal
                 if (tokens[pos].valor == "Entonces")
                     match("PR", "Entonces");
                 _emparejar("ENDL");
 
                 // Bloque de código para el Si
-                while (tokens[pos].valor != "Fin" && tokens[pos].valor != "Sino")
+                while ((tokens[pos].valor != "Fin" && tokens[pos+1].valor != "Si") && tokens[pos].valor != "Sino")
                 {
                     instruccion();
                     _emparejar("ENDL");
@@ -1287,8 +1289,31 @@ private:
                 match("PR", "Fin");
                 match("PR", "Si");
             }
+            //same as if lol
+            if (tokens[pos].valor == "Mientras")
+            {
 
-            // Senencia Leer
+                match("PR", "Mientras");
+                _emparejar("(");
+                expresion(true);
+                _emparejar(")");
+                //es opcional, literal en el diagrama dice, animal
+                if (tokens[pos].valor == "Entonces")
+                    match("PR", "Entonces");
+                _emparejar("ENDL");
+
+                // Bloque de código para el Mierdas digo mientrsas
+                while (tokens[pos].valor != "Fin" && tokens[pos+1].valor != "Mientras")
+                {
+                    instruccion();
+                    _emparejar("ENDL");
+                }
+
+                // Fin Si
+                match("PR", "Fin");
+                match("PR", "Mientras");
+            }
+            // Sentencia Leer
             else if (tokens[pos].valor == "Leer")
             {
                 match("PR", "Leer");
