@@ -1,10 +1,11 @@
-Programa proj chaval
+Programa proj_chaval
     Para(i = 0;i<1;i++)
         Si(a==32)
             minmin = uwu
         Sino
             minmin = 32
             a++
+
         Fin Si
         Mientras (a==32)
             Imprimir("comer owo")

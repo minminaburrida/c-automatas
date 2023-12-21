@@ -1340,7 +1340,7 @@ private:
                 _emparejar(")");
                 _emparejar("ENDL");
 
-                while (tokens[pos].valor != "Fin")
+                while (tokens[pos].valor != "Fin" && tokens[pos+1].valor != "Para")
                 {
                     instruccion();
                     _emparejar("ENDL");
